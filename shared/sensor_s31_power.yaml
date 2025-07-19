@@ -21,6 +21,7 @@ switch:
     pin: ${relay_pin}
     name: "${device_friendly_name} Relay"
     id: s31_relay
+    restore_mode: ${relay_restore_mode}
 
 binary_sensor:
   - platform: gpio
