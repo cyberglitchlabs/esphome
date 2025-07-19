@@ -1,16 +1,11 @@
 substitutions:
   device_name: anavi-fume-extractor
-  board_type: esp32-s3-devkitc-1
+  device_friendly_name: "ANAVI Fume Extractor"
+  config_version: "1.0.0"
   font_file: "fonts/arial.ttf"
   font_size: "16"
 
-esphome:
-  name: ${device_name}
-  friendly_name: ANAVI Fume Extractor
-  # Automatically add the mac address to the name
-  # so you can use a single firmware for all devices
-  name_add_mac_suffix: true
-  board: !include ../shared/board_anavi_fume_extractor_esp32_s3.yaml
+# esphome section moved to board file
 
 # To be able to get logs from the device via serial and api.
 logger:
@@ -31,15 +26,15 @@ wifi:
 captive_portal:
 
 packages:
-  uptime: !include ../shared/uptime.yaml
-  mq135: !include ../shared/mq135.yaml
-  dht22: !include ../shared/dht22.yaml
-  bmp180: !include ../shared/bmp180.yaml
-  bh1750: !include ../shared/bh1750.yaml
-  i2c: !include ../shared/i2c.yaml
-  button: !include ../shared/button.yaml
-  buzzer: !include ../shared/buzzer.yaml
-  rotary_encoder: !include ../shared/rotary_encoder.yaml
+  sensor_uptime: !include ../shared/sensor_uptime.yaml
+  sensor_mq135: !include ../shared/sensor_mq135.yaml
+  sensor_dht22: !include ../shared/sensor_dht22.yaml
+  sensor_bmp180: !include ../shared/sensor_bmp180.yaml
+  sensor_bh1750: !include ../shared/sensor_bh1750.yaml
+  i2c_bus: !include ../shared/i2c_bus.yaml
+  binary_sensor_button: !include ../shared/binary_sensor_button.yaml
+  output_buzzer: !include ../shared/output_buzzer.yaml
+  sensor_rotary_encoder: !include ../shared/sensor_rotary_encoder.yaml
   # Add more shared configs as needed
 
 font:
@@ -52,7 +47,13 @@ display:
     model: "SSD1306 128x64"
     address: ${bh1750_addr}
     lambda: |-
-      it.printf(0, 0, id(my_font), "Fan Speed: %d%%", (int)id(fan_speed_encoder).state);
+      // Status row (yellow, top 16px)
+      it.fill_rect(0, 0, 128, 16, COLOR_YELLOW);
+      it.printf(2, 2, id(my_font), COLOR_BLACK, "Status: %s", (id(fan_switch).state ? "ON" : "OFF"));
+      // Main info rows (blue)
+      it.printf(0, 18, id(my_font), "Fan: %d%%", (int)id(fan_speed_encoder).state);
+      it.printf(0, 34, id(my_font), "CO2: %.0fppm", id(mq135_co2_ppm).state);
+      it.printf(0, 50, id(my_font), "Temp: %.1fC Hum: %.0f%%", id(dht22_temperature).state, id(dht22_humidity).state);
 
 dashboard_import:
-  package_import_url: github://yourusername/esphome/devices/anavi-fume-extractor-esp32-s3.yaml@main
+  package_import_url: github://cyberglitchlabs/esphome/devices/anavi-fume-extractor-esp32-s3.yaml@main

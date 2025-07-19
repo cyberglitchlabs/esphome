@@ -1,5 +1,0 @@
-sensor:
-  - platform: adc
-    pin: GPIO36
-    name: "Air Quality MQ-135"
-    update_interval: 60s

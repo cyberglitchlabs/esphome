@@ -1,0 +1,59 @@
+sensor:
+  - platform: adc
+    pin: ${mq135_pin}
+    name: "Air Quality MQ-135"
+    update_interval: 60s
+
+  - platform: adc
+    pin: GPIO36
+    name: "MQ135 Raw ADC"
+    id: mq135_adc
+    update_interval: 60s
+
+  - platform: template
+    name: "${device_friendly_name} CO2 PPM"
+    unit_of_measurement: "ppm"
+    accuracy_decimals: 0
+    update_interval: 60s
+    lambda: |-
+      // MQ135 CO2 calculation with temperature/humidity correction
+      // Constants from MQ135 Arduino library
+      // Temperature is expected in degrees Celsius (°C)
+      // Humidity is expected in percent relative humidity (%RH)
+      const float RLOAD = 10.0; // kOhm, load resistor
+      const float RZERO = 76.63; // kOhm, sensor resistance in clean air (calibrate for your sensor)
+      const float PARA = 116.6020682; // curve parameter A
+      const float PARB = 2.769034857; // curve parameter B
+      // Correction factor constants
+      const float CORA = 0.00035;
+      const float CORB = 0.02718;
+      const float CORC = 1.39538;
+      const float CORD = 0.0018;
+      const float CORE = -0.003333333;
+      const float CORF = 0.001923077;
+      const float CORG = 1.130128205;
+      // Read sensor values
+      float adc = id(mq135_adc).state; // Raw ADC value from MQ135
+      float temp = id(${mq135_temp_sensor}).state; // Temperature sensor (°C)
+      float hum = id(${mq135_hum_sensor}).state; // Humidity sensor (%RH)
+      // Check for valid readings
+      if (adc <= 0 || isnan(temp) || isnan(hum)) return NAN;
+      // Convert ADC value to sensor resistance
+      float resistance = ((1023.0 / adc) - 1.0) * RLOAD;
+      // Calculate correction factor for temp/humidity
+      float corr;
+      if (temp < 20.0) {
+        // Below 20°C
+        corr = CORA * temp * temp - CORB * temp + CORC - (hum - 33.0) * CORD;
+      } else {
+        // 20°C and above
+        corr = CORE * temp + CORF * hum + CORG;
+      }
+      // Apply correction to resistance
+      float corrected_resistance = resistance / corr;
+      // Calculate CO2 ppm
+      float ppm = PARA * pow((corrected_resistance / RZERO), -PARB);
+      return ppm;
+    icon: "mdi:molecule-co2"
+    state_class: "measurement"
+    entity_category: "diagnostic"

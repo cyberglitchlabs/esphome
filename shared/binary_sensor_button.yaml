@@ -1,7 +1,7 @@
 # Shared button config
 binary_sensor:
   - platform: gpio
-    pin: GPIO25
+    pin: ${button_pin}
     name: "Power Button"
     id: power_button
     on_press:

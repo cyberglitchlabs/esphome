@@ -1,0 +1,8 @@
+sensor:
+  - platform: bmp180
+    temperature:
+      name: "${device_friendly_name} Temperature"
+    pressure:
+      name: "${device_friendly_name} Pressure"
+    address: ${bmp180_addr}
+    update_interval: 60s

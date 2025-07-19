@@ -1,0 +1,20 @@
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${device_friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: cyberglitchlabs.sonoff-s31
+    version: ${config_version}
+
+# Pin configuration for Sonoff S31
+substitutions:
+  relay_pin: GPIO12
+  led_pin: GPIO13
+  button_pin: GPIO0
+  power_sensor_rx: GPIO3
+  power_sensor_tx: GPIO1

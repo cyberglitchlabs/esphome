@@ -1,7 +1,7 @@
 # Shared buzzer config
 output:
   - platform: gpio
-    pin: GPIO26
+    pin: ${buzzer_pin}
     id: buzzer_output
 
 switch:

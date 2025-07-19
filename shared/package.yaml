@@ -1,5 +1,0 @@
-# Example: Shared package configuration
-# Add your common packages here
-# Example:
-# packages:
-#   wifi: !include wifi.yaml

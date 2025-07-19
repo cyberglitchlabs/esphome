@@ -7,11 +7,6 @@ on:
     paths:
       - 'static/**'
       - '.github/workflows/publish-pages.yml'
-  workflow_run:
-    workflows:
-      - Publish Firmware
-    types:
-      - completed
   pull_request:
     paths:
       - 'static/**'
@@ -30,20 +25,12 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - run: mkdir -p output/firmware
 
       - name: Build
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./static
           destination: ./output
-
-      - name: Fetch firmware files
-        uses: robinraju/release-downloader@v1
-        with:
-          latest: true
-          fileName: '*'
-          out-file-path: output/firmware
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -60,9 +47,6 @@ jobs:
     permissions:
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Setup Pages
         uses: actions/configure-pages@v5

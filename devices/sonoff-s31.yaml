@@ -1,0 +1,21 @@
+substitutions:
+  device_name: sonoff-s31
+  device_friendly_name: "Sonoff S31"
+  config_version: "1.0.0"
+  # board_type: esp01_1m
+
+board: !include ../shared/board_sonoff_s31.yaml
+
+logger:
+api:
+ota:
+  - platform: esphome
+
+wifi:
+  ap:
+captive_portal:
+
+packages:
+  sensor_s31_power: !include ../shared/sensor_s31_power.yaml
+
+# Add dashboard_import if you want to support ESPHome dashboard imports

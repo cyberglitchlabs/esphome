@@ -1,5 +1,15 @@
+esphome:
+  name: ${device_name}
+  friendly_name: ${device_friendly_name}
+  # Automatically add the mac address to the name
+  # so you can use a single firmware for all devices
+  name_add_mac_suffix: true
+  project:
+    name: cyberglitchlabs.anavi-fume-extractor
+    version: ${config_version}
+
 esp32:
-  board: ${board_type}
+  board: esp32-s3-devkitc-1
   framework:
     type: esp-idf
 
@@ -16,3 +26,5 @@ substitutions:
   bh1750_addr: 0x23
   i2c_sda: GPIO21
   i2c_scl: GPIO22
+  mq135_temp_sensor: dht22_temperature
+  mq135_hum_sensor: dht22_humidity

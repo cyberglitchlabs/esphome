@@ -1,0 +1,5 @@
+sensor:
+  - platform: bh1750
+    name: "${device_friendly_name} Illuminance"
+    address: ${bh1750_addr}
+    update_interval: 60s

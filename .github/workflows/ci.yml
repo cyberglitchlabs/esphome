@@ -13,35 +13,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
-    name: Building ${{ matrix.file }} / ${{ matrix.esphome-version }}
+  lint:
+    name: Lint YAML
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        #### Modify below here to match your project ####
-        file:
-          - project-template-esp32
-          - project-template-esp32-c3
-          - project-template-esp32-c6
-          - project-template-esp32-s3
-        #### Modify above here to match your project ####
-
-        esphome-version:
-          - stable
-          - beta
-          - dev
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      - name: ESPHome ${{ matrix.esphome-version }}
-        uses: esphome/build-action@v7
+      - name: Lint YAML files
+        uses: ibiqlik/action-yamllint@v3
         with:
-          yaml-file: ${{ matrix.file }}.yaml
-          version: ${{ matrix.esphome-version }}
-      - name: ESPHome ${{ matrix.esphome-version }} Factory
-        uses: esphome/build-action@v7
-        with:
-          yaml-file: ${{ matrix.file }}.factory.yaml
-          version: ${{ matrix.esphome-version }}
+          file_or_dir: .
+
+  esphome-validate:
+    name: ESPHome Validate Devices
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Validate ESPHome configs in devices/
+        run: |
+          pip install esphome
+          for file in devices/*.yaml; do
+            esphome config "$file"
+          done

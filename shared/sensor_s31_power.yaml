@@ -1,0 +1,36 @@
+sensor:
+  - platform: cse7766
+    current:
+      name: "${device_friendly_name} Current"
+      unit_of_measurement: "A"
+    voltage:
+      name: "${device_friendly_name} Voltage"
+      unit_of_measurement: "V"
+    power:
+      name: "${device_friendly_name} Power"
+      unit_of_measurement: "W"
+    energy:
+      name: "${device_friendly_name} Energy"
+      unit_of_measurement: "Wh"
+    update_interval: 60s
+    rx_pin: ${power_sensor_rx}
+    tx_pin: ${power_sensor_tx}
+
+switch:
+  - platform: gpio
+    pin: ${relay_pin}
+    name: "${device_friendly_name} Relay"
+    id: s31_relay
+
+binary_sensor:
+  - platform: gpio
+    pin: ${button_pin}
+    name: "${device_friendly_name} Button"
+    on_press:
+      then:
+        - switch.toggle: s31_relay
+
+output:
+  - platform: gpio
+    pin: ${led_pin}
+    id: s31_led

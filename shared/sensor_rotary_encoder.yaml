@@ -2,8 +2,8 @@
 sensor:
   - platform: rotary_encoder
     name: "Fan Speed Encoder"
-    pin_a: GPIO32
-    pin_b: GPIO33
+    pin_a: ${rotary_a_pin}
+    pin_b: ${rotary_b_pin}
     min_value: 0
     max_value: 100
     resolution: 1
