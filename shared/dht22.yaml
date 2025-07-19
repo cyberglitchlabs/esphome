@@ -1,0 +1,9 @@
+sensor:
+  - platform: dht
+    pin: GPIO4
+    temperature:
+      name: "DHT22 Temperature"
+    humidity:
+      name: "DHT22 Humidity"
+    model: DHT22
+    update_interval: 60s

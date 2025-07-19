@@ -1,0 +1,9 @@
+# Shared button config
+binary_sensor:
+  - platform: gpio
+    pin: GPIO25
+    name: "Power Button"
+    id: power_button
+    on_press:
+      then:
+        - switch.toggle: fan_switch

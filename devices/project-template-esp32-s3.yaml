@@ -1,0 +1,89 @@
+esphome:
+  name: project-template
+  friendly_name: Project Template
+  # Automatically add the mac address to the name
+  # so you can use a single firmware for all devices
+  name_add_mac_suffix: true
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+# To be able to get logs from the device via serial and api.
+logger:
+
+# API is a requirement of the dashboard import.
+api:
+
+# OTA is required for Over-the-Air updating
+ota:
+  - platform: esphome
+
+wifi:
+  # Set up a wifi access point using the device name above
+  ap:
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device.
+captive_portal:
+
+sensor:
+  - platform: uptime
+    name: "Uptime Sensor"
+  # Rotary encoder for fan speed
+  - platform: rotary_encoder
+    name: "Fan Speed Encoder"
+    pin_a: GPIO32
+    pin_b: GPIO33
+    min_value: 0
+    max_value: 100
+    resolution: 1
+    id: fan_speed_encoder
+
+binary_sensor:
+  - platform: gpio
+    pin: GPIO25
+    name: "Power Button"
+    id: power_button
+    on_press:
+      then:
+        - switch.toggle: fan_switch
+
+# Fan PWM output
+output:
+  - platform: ledc
+    pin: GPIO27
+    id: fan_pwm
+    frequency: 25000 Hz
+  # Buzzer output
+  - platform: gpio
+    pin: GPIO26
+    id: buzzer_output
+
+switch:
+  - platform: output
+    name: "Fan"
+    output: fan_pwm
+    id: fan_switch
+  - platform: output
+    name: "Buzzer"
+    output: buzzer_output
+    id: buzzer_switch
+
+font:
+  - file: "fonts/arial.ttf"
+    id: my_font
+    size: 16
+
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    lambda: |-
+      it.printf(0, 0, id(my_font), "Fan Speed: %d%%", (int)id(fan_speed_encoder).state);

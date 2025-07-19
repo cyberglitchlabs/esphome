@@ -1,0 +1,11 @@
+# Shared buzzer config
+output:
+  - platform: gpio
+    pin: GPIO26
+    id: buzzer_output
+
+switch:
+  - platform: output
+    name: "Buzzer"
+    output: buzzer_output
+    id: buzzer_switch

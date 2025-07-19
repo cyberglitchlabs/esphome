@@ -1,13 +1,18 @@
-# ESPHome Project Template
+# ESPHome Multi-Device Project
 
-This repo serves as a template for creating a new ESPHome project.
+## Structure
 
-It includes a GitHub workflow that will automatically build the configuration(s) and then deploys a simple 
-website via GitHub pages that utilises [ESP Web Tools](https://esphome.github.io/esp-web-tools/) for users to 
-easily install your project onto their device.
+- `devices/` — Individual device YAMLs (per board/model)
+- `templates/` — Board templates and factory configs
+- `shared/` — Common sensors, packages, automations, templates
+- `_template/` — Setup checklist and documentation
+- `static/` — Site config and docs
+- `README.md` — Main documentation
 
-## Instructions
+## Usage
 
-1. Use this repo template to [generate](https://github.com/esphome/esphome-project-template/generate) your own repository.
-2. Clone your new repository.
-3. Follow the checklist created as an issue in your new repository.
+- Add new device configs to `devices/`
+- Add new board templates to `templates/`
+- Place shared configs in `shared/` and use `!include` in device YAMLs
+
+See `_template/setup-checklist.md` for setup steps.

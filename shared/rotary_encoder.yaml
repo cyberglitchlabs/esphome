@@ -1,0 +1,10 @@
+# Shared rotary encoder config
+sensor:
+  - platform: rotary_encoder
+    name: "Fan Speed Encoder"
+    pin_a: GPIO32
+    pin_b: GPIO33
+    min_value: 0
+    max_value: 100
+    resolution: 1
+    id: fan_speed_encoder

@@ -6,7 +6,7 @@ esphome:
   name_add_mac_suffix: true
 
 esp32:
-  board: esp32-s3-devkitc-1
+  board: esp32dev
   framework:
     type: esp-idf
 
@@ -27,3 +27,7 @@ wifi:
 # In combination with the `ap` this allows the user
 # to provision wifi credentials to the device.
 captive_portal:
+
+sensor: !include ../shared/sensor.yaml
+packages: !include ../shared/package.yaml
+automation: !include ../shared/automation.yaml

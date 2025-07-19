@@ -1,0 +1,73 @@
+substitutions:
+  device_name: anavi-fume-extractor
+  board_type: esp32-s3-devkitc-1
+  fan_pwm_pin: GPIO27
+  buzzer_pin: GPIO26
+  button_pin: GPIO25
+  rotary_a_pin: GPIO32
+  rotary_b_pin: GPIO33
+  mq135_pin: GPIO36
+  dht22_pin: GPIO4
+  bmp180_addr: 0x77
+  bh1750_addr: 0x23
+  i2c_sda: GPIO21
+  i2c_scl: GPIO22
+  font_file: "fonts/arial.ttf"
+  font_size: "16"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ANAVI Fume Extractor
+  # Automatically add the mac address to the name
+  # so you can use a single firmware for all devices
+  name_add_mac_suffix: true
+
+esp32:
+  board: ${board_type}
+  framework:
+    type: esp-idf
+
+# To be able to get logs from the device via serial and api.
+logger:
+
+# API is a requirement of the dashboard import.
+api:
+
+# OTA is required for Over-the-Air updating
+ota:
+  - platform: esphome
+
+wifi:
+  # Set up a wifi access point using the device name above
+  ap:
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device.
+captive_portal:
+
+packages:
+  uptime: !include ../shared/uptime.yaml
+  mq135: !include ../shared/mq135.yaml
+  dht22: !include ../shared/dht22.yaml
+  bmp180: !include ../shared/bmp180.yaml
+  bh1750: !include ../shared/bh1750.yaml
+  i2c: !include ../shared/i2c.yaml
+  button: !include ../shared/button.yaml
+  buzzer: !include ../shared/buzzer.yaml
+  rotary_encoder: !include ../shared/rotary_encoder.yaml
+  # Add more shared configs as needed
+
+font:
+  - file: ${font_file}
+    id: my_font
+    size: ${font_size}
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: ${bh1750_addr}
+    lambda: |-
+      it.printf(0, 0, id(my_font), "Fan Speed: %d%%", (int)id(fan_speed_encoder).state);
+
+dashboard_import:
+  package_import_url: github://yourusername/esphome/devices/anavi-fume-extractor-esp32-s3.yaml@main
