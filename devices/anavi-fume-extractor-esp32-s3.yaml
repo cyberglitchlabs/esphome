@@ -1,17 +1,6 @@
 substitutions:
   device_name: anavi-fume-extractor
   board_type: esp32-s3-devkitc-1
-  fan_pwm_pin: GPIO27
-  buzzer_pin: GPIO26
-  button_pin: GPIO25
-  rotary_a_pin: GPIO32
-  rotary_b_pin: GPIO33
-  mq135_pin: GPIO36
-  dht22_pin: GPIO4
-  bmp180_addr: 0x77
-  bh1750_addr: 0x23
-  i2c_sda: GPIO21
-  i2c_scl: GPIO22
   font_file: "fonts/arial.ttf"
   font_size: "16"
 
@@ -21,11 +10,7 @@ esphome:
   # Automatically add the mac address to the name
   # so you can use a single firmware for all devices
   name_add_mac_suffix: true
-
-esp32:
-  board: ${board_type}
-  framework:
-    type: esp-idf
+  board: !include ../shared/board_anavi_fume_extractor_esp32_s3.yaml
 
 # To be able to get logs from the device via serial and api.
 logger:

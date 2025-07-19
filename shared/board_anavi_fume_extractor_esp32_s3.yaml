@@ -1,0 +1,18 @@
+esp32:
+  board: ${board_type}
+  framework:
+    type: esp-idf
+
+# Unique pin configuration for ANAVI Fume Extractor ESP32-S3
+substitutions:
+  fan_pwm_pin: GPIO27
+  buzzer_pin: GPIO26
+  button_pin: GPIO25
+  rotary_a_pin: GPIO32
+  rotary_b_pin: GPIO33
+  mq135_pin: GPIO36
+  dht22_pin: GPIO4
+  bmp180_addr: 0x77
+  bh1750_addr: 0x23
+  i2c_sda: GPIO21
+  i2c_scl: GPIO22
