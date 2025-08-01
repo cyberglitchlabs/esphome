@@ -1,2 +1,0 @@
-# Refactored: see individual sensor files in shared/
-# Remove all sensor and i2c definitions from this file.
