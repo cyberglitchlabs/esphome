@@ -1,0 +1,77 @@
+# ESPHome settings menu for display mode and brightness
+settings:
+  menu:
+    - name: "Display Mode"
+      id: wopr_display_mode_setting
+      type: select
+      options:
+        - "Blinkenlights"
+        - "Date/Time"
+      initial_value: "Blinkenlights"
+    - name: "Display Brightness"
+      id: wopr_display_brightness_setting
+      type: number
+      min: 0
+      max: 15
+      step: 1
+      initial_value: 8
+
+display:
+  - platform: max7219digit
+    id: wopr_display
+    cs_pin: ${max7219_cs_pin}
+    num_chips: ${max7219_num_chained}
+    spi_id: spi_bus
+    intensity: 8
+    lambda: |-
+      // Mode: 0 = Blinkenlights, 1 = Date/Time
+      int mode = 0;
+      if (id(wopr_display_mode_setting).state == "Date/Time") mode = 1;
+      static int frame = 0;
+      frame++;
+      if (mode == 0) {
+        // Blinkenlights effect
+        for (int y = 0; y < 8; y++) {
+          for (int x = 0; x < 96; x++) {
+            if ((rand() % 10) < 2) {
+              it.draw_pixel_at(x, y, 1);
+            } else {
+              it.draw_pixel_at(x, y, 0);
+            }
+          }
+        }
+      } else if (mode == 1) {
+        // Date/Time effect
+        if (id(home_time).now().is_valid()) {
+          char buf[32];
+          auto t = id(home_time).now();
+          // Format: YYYY-MM-DD
+          snprintf(buf, sizeof(buf), "%04d-%02d-%02d", t.year, t.month, t.day_of_month);
+          it.printf(0, 0, buf);
+          // Format: HH:MM:SS
+          snprintf(buf, sizeof(buf), "%02d:%02d:%02d", t.hour, t.minute, t.second);
+          it.printf(0, 1, buf);
+        } else {
+          it.printf(0, 0, "No Time");
+        }
+      }
+
+interval:
+  - interval: 500ms
+    then:
+      - lambda: |-
+          static int last_intensity = -1;
+          int new_intensity = int(id(wopr_display_brightness_setting).state);
+          if (new_intensity != last_intensity) {
+            id(wopr_display).set_intensity(new_intensity);
+            last_intensity = new_intensity;
+          }
+
+time:
+  - platform: homeassistant
+    id: home_time
+
+spi:
+  id: spi_bus
+  clk_pin: ${max7219_clk_pin}
+  mosi_pin: ${max7219_data_pin}

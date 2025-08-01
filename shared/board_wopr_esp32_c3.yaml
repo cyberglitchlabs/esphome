@@ -1,0 +1,18 @@
+esphome:
+  name: ${device_name}
+  friendly_name: ${device_friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: cyberglitchlabs.wopr
+    version: ${config_version}
+
+esp32:
+  board: esp32-c3-supermini
+  framework:
+    type: esp-idf
+
+substitutions:
+  max7219_clk_pin: GPIO4
+  max7219_data_pin: GPIO6
+  max7219_cs_pin: GPIO7
+  max7219_num_chained: "12"

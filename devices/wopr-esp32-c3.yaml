@@ -1,0 +1,24 @@
+substitutions:
+  device_name: wopr
+  device_friendly_name: "WOPR Blinkenlights"
+  config_version: "1.0.0"
+  max7219_clk_pin: GPIO4
+  max7219_data_pin: GPIO6
+  max7219_cs_pin: GPIO7
+  max7219_num_chained: "12"  # 3 modules x 4 digits/module
+
+board: !include ../shared/board_wopr_esp32_c3.yaml
+
+logger:
+api:
+ota:
+  - platform: esphome
+
+wifi:
+  ap:
+captive_portal:
+
+packages:
+  display_blinkenlights: !include ../shared/display_wopr_blinkenlights.yaml
+
+# Add dashboard_import if you want to support ESPHome dashboard imports
