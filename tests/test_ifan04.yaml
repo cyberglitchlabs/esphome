@@ -1,0 +1,13 @@
+substitutions:
+  name: "test-ifan04"
+  friendly_name: "Test iFan04"
+  wifi_ssid: "TestSSID"
+  wifi_password: "TestPassword"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+packages:
+  # Using local path for CI to test changes in the PR
+  base: !include ../packages/ifan04_base.yaml

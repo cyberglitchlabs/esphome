@@ -1,0 +1,30 @@
+name: Validate ESPHome Settings
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate ${{ matrix.file }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file:
+          - tests/test_s31.yaml
+          - tests/test_ifan04.yaml
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install ESPHome
+        run: pip install esphome
+
+      - name: Validate Config
+        run: esphome config ${{ matrix.file }}
