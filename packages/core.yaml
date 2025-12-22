@@ -1,10 +1,16 @@
 substitutions:
   wifi_ssid: 
   wifi_password: 
+  # Default to WPA2-PSK for security, but allow override
+  wifi_min_auth_mode: "WPA2-PSK"
 
 wifi:
   ssid: ${wifi_ssid}
   password: ${wifi_password}
+  fast_connect: true
+  
+  # Security setting to avoid warning
+  min_auth_mode: ${wifi_min_auth_mode}
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -16,6 +22,10 @@ api:
 ota:
   - platform: esphome
   - platform: web_server
+
+# Required for ota: platform: web_server
+web_server:
+  port: 80
 
 time:
   - platform: sntp
