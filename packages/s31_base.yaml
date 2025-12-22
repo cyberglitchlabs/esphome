@@ -1,0 +1,7 @@
+packages:
+  core: !include core.yaml
+  device: !include sonoff_s31.yaml
+
+dashboard_import:
+  package_import_url: github://cyberglitchlabs/esphome/packages/s31_base.yaml
+  import_full_config: false

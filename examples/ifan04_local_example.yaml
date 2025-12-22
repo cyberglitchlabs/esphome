@@ -1,0 +1,21 @@
+substitutions:
+  # Unique ID for this device
+  name: "bedroom-fan"
+  friendly_name: "Bedroom Fan"
+  
+  # WiFi Credentials
+  wifi_ssid: "MyWiFiSSID"
+  wifi_password: "MyWiFiPassword"
+  # wifi_ssid: !secret wifi_ssid
+  # wifi_password: !secret wifi_password
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+packages:
+  remote_package:
+    # URL to the packages/ifan04_base.yaml in your remote repo
+    # If you have forked this repo, replace 'cyberglitchlabs/esphome' with your fork's path
+    url: github://cyberglitchlabs/esphome/packages/ifan04_base.yaml
+    ref: main

@@ -1,0 +1,16 @@
+packages:
+  core: !include core.yaml
+  device: !include sonoff_ifan04.yaml
+
+dashboard_import:
+  package_import_url: github://cyberglitchlabs/esphome/packages/ifan04_base.yaml
+  import_full_config: false
+
+esphome:
+  on_boot:
+    - priority: 600
+      then:
+        - output.turn_off: buzzer
+        - globals.set: # needed to disable actions on switch initialization (state restore)
+            id: switches_initialized
+            value: "true"
