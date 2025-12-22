@@ -2,7 +2,7 @@ substitutions:
   wifi_ssid: 
   wifi_password: 
   # Default to WPA2-PSK for security, but allow override
-  wifi_min_auth_mode: "WPA2-PSK"
+  wifi_min_auth_mode: "WPA2"
 
 wifi:
   ssid: ${wifi_ssid}
