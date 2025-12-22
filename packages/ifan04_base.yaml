@@ -7,6 +7,9 @@ dashboard_import:
   import_full_config: false
 
 esphome:
+  project:
+    name: "cyberglitchlabs.sonoff_ifan04"
+    version: "1.0.0"
   on_boot:
     - priority: 600
       then:

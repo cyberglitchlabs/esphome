@@ -5,3 +5,8 @@ packages:
 dashboard_import:
   package_import_url: github://cyberglitchlabs/esphome/packages/s31_base.yaml
   import_full_config: false
+
+esphome:
+  project:
+    name: "cyberglitchlabs.sonoff_s31"
+    version: "1.0.0"
