@@ -8,14 +8,23 @@ esphome:
   name: ${name}
   friendly_name: ${friendly_name}
 
+# WiFi Configuration for testing
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+
+# Enable Home Assistant API
+api:
+
+# Enable Over-The-Air updates
+ota:
+  - platform: esphome
+
+# Time sync
+time:
+  - platform: sntp
+    id: my_time
+
 packages:
-  core:
-    url: github://cyberglitchlabs/esphome
-    ref: main
-    files: [packages/core.yaml]
-    refresh: 0s
-  device:
-    url: github://cyberglitchlabs/esphome
-    ref: main
-    files: [packages/owon_xdm_base.yaml]
-    refresh: 0s
+  # Using local path for CI to test changes in the PR
+  base: !include ../packages/owon_xdm_base.yaml
