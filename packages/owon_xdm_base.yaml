@@ -133,7 +133,8 @@ script:
       - logger.log: "Multimeter initialization complete!"
 
 # Run initialization on boot
-on_boot:
-  - priority: -100
-    then:
-      - script.execute: initialize_multimeter
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - script.execute: initialize_multimeter
