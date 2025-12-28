@@ -1,0 +1,21 @@
+substitutions:
+  name: "test-owon-xdm"
+  friendly_name: "Test OWON XDM"
+  wifi_ssid: "TestSSID"
+  wifi_password: "TestPassword"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+packages:
+  core:
+    url: github://cyberglitchlabs/esphome
+    ref: main
+    files: [packages/core.yaml]
+    refresh: 0s
+  device:
+    url: github://cyberglitchlabs/esphome
+    ref: main
+    files: [packages/owon_xdm_base.yaml]
+    refresh: 0s

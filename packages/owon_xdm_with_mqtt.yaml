@@ -1,0 +1,11 @@
+# OWON XDM Remote hardware definition with optional MQTT integration
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/owon_xdm_base.yaml]
+    ref: main
+  mqtt:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/owon_xdm_mqtt.yaml]
+    ref: main

@@ -1,0 +1,139 @@
+substitutions:
+  friendly_name: "OWON XDM Remote"
+  # Default command timeout in seconds
+  command_timeout: "1.0"
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+logger:
+  level: DEBUG
+  baud_rate: 0  # Disable UART logging to avoid conflicts with multimeter UART
+
+# UART configuration for OWON XDM1041
+uart:
+  id: xdm_uart
+  tx_pin: GPIO21
+  rx_pin: GPIO20
+  baud_rate: 115200
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+
+# Status LED (active-low on ESP32-C3 Super Mini)
+output:
+  - platform: gpio
+    pin: GPIO8
+    inverted: true
+    id: status_led_output
+
+light:
+  - platform: binary
+    name: "${friendly_name} Status LED"
+    output: status_led_output
+    id: status_led
+    internal: true
+
+# Text sensors for SCPI responses and status
+text_sensor:
+  - platform: template
+    name: "${friendly_name} Response"
+    id: scpi_response
+    icon: "mdi:message-text"
+
+# Sensors
+sensor:
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal"
+    id: wifi_signal_sensor
+    update_interval: 60s
+
+# Binary sensors for device connectivity
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+
+# Startup sequence to initialize the multimeter
+script:
+  - id: initialize_multimeter
+    mode: single
+    then:
+      - logger.log: "Starting multimeter initialization..."
+      - light.turn_on:
+          id: status_led
+          transition_length: 0s
+      - delay: 2s
+      
+      # Wait for idle line
+      - logger.log: "Checking for idle UART line..."
+      - delay: 2s
+      
+      # Query device identification
+      - logger.log: "Querying device with *IDN?..."
+      - uart.write:
+          id: xdm_uart
+          data: "*IDN?\r\n"
+      - delay: 1s
+      - lambda: |-
+          std::string response = "";
+          while (id(xdm_uart).available()) {
+            uint8_t byte;
+            id(xdm_uart).read_byte(&byte);
+            response += (char)byte;
+          }
+          ESP_LOGI("xdm", "IDN Response: %s", response.c_str());
+      
+      # Set high sampling rate
+      - logger.log: "Setting high sampling rate (RATE F)..."
+      - uart.write:
+          id: xdm_uart
+          data: "RATE F\r\n"
+      - delay: 500ms
+      
+      # Verify sampling rate
+      - logger.log: "Verifying sampling rate (RATE?)..."
+      - uart.write:
+          id: xdm_uart
+          data: "RATE?\r\n"
+      - delay: 500ms
+      - lambda: |-
+          std::string response = "";
+          while (id(xdm_uart).available()) {
+            uint8_t byte;
+            id(xdm_uart).read_byte(&byte);
+            response += (char)byte;
+          }
+          response.erase(0, response.find_first_not_of(" \n\r\t"));
+          response.erase(response.find_last_not_of(" \n\r\t") + 1);
+          if (response == "F") {
+            ESP_LOGI("xdm", "High sampling rate confirmed!");
+          } else {
+            ESP_LOGW("xdm", "Unexpected rate response: %s", response.c_str());
+          }
+      
+      # Blink LED to indicate success
+      - light.turn_off:
+          id: status_led
+          transition_length: 0s
+      - delay: 500ms
+      - light.turn_on:
+          id: status_led
+          transition_length: 0s
+      - delay: 500ms
+      - light.turn_off:
+          id: status_led
+          transition_length: 0s
+      - delay: 500ms
+      - light.turn_on:
+          id: status_led
+          transition_length: 0s
+      
+      - logger.log: "Multimeter initialization complete!"
+
+# Run initialization on boot
+on_boot:
+  - priority: -100
+    then:
+      - script.execute: initialize_multimeter

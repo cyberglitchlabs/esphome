@@ -1,0 +1,75 @@
+substitutions:
+  name: "lab-multimeter"
+  friendly_name: "Lab Multimeter"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+dashboard_import:
+  package_import_url: github://cyberglitchlabs/esphome/packages/owon_xdm.yaml
+  import_full_config: false
+
+# WiFi Configuration
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  
+  # Enable fallback hotspot in case wifi connection fails
+  ap:
+    ssid: "${friendly_name} Fallback"
+    password: ""
+
+# Enable Home Assistant API
+api:
+
+# Enable Over-The-Air updates
+ota:
+  - platform: esphome
+  - platform: web_server
+
+# Optional: Web server for direct device access
+web_server:
+  port: 80
+
+# Time sync
+time:
+  - platform: sntp
+    id: my_time
+
+# Option 1: Without MQTT (ESPHome API only)
+packages:
+  remote_package:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/owon_xdm.yaml]
+    ref: main
+    refresh: 1d
+
+# Option 2: With MQTT support (uncomment below, comment out above)
+# packages:
+#   remote_package:
+#     url: https://github.com/cyberglitchlabs/esphome
+#     files: [packages/owon_xdm_with_mqtt.yaml]
+#     ref: main
+#     refresh: 1d
+
+# If using MQTT (Option 2), configure the broker here:
+# mqtt:
+#   broker: !secret mqtt_broker
+#   port: !secret mqtt_port
+#   username: !secret mqtt_user
+#   password: !secret mqtt_password
+#   discovery: true
+#   discovery_prefix: homeassistant
+#   birth_message:
+#     topic: ${mqtt_base_topic}/status
+#     payload: "online"
+#     retain: true
+#   will_message:
+#     topic: ${mqtt_base_topic}/status
+#     payload: "offline"
+#     retain: true
+# 
+# # Optional: Override MQTT base topic
+# substitutions:
+#   mqtt_base_topic: "lab/xdm1041"

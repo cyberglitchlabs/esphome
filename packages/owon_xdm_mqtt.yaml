@@ -1,0 +1,91 @@
+# Optional MQTT integration for OWON XDM Remote
+# Include this package if you want MQTT-SCPI bridge functionality
+# Make sure to define the MQTT broker configuration in your device config
+
+substitutions:
+  # MQTT topics for the multimeter
+  mqtt_base_topic: "xdm1041"
+
+# MQTT connection hooks
+mqtt:
+  on_connect:
+    - mqtt.publish:
+        topic: ${mqtt_base_topic}/status
+        payload: "online"
+        retain: true
+
+# MQTT Command Subscription
+text_sensor:
+  - platform: mqtt_subscribe
+    name: "${friendly_name} MQTT Command"
+    id: mqtt_scpi_command
+    topic: ${mqtt_base_topic}/cmd
+    internal: true
+    on_value:
+      then:
+        - logger.log:
+            format: "Received MQTT SCPI command: %s"
+            args: ['x.c_str()']
+        - uart.write:
+            id: xdm_uart
+            data: !lambda |-
+              std::string cmd = x + "\r\n";
+              return std::vector<uint8_t>(cmd.begin(), cmd.end());
+        - delay: 200ms
+        - lambda: |-
+            // Read response from UART
+            std::string response = "";
+            unsigned long start = millis();
+            while (millis() - start < ${command_timeout} * 1000) {
+              if (id(xdm_uart).available()) {
+                uint8_t byte;
+                id(xdm_uart).read_byte(&byte);
+                if (byte >= 32 || byte == '\n' || byte == '\r') {
+                  response += (char)byte;
+                }
+              } else {
+                delay(10);
+              }
+            }
+            // Trim whitespace
+            response.erase(0, response.find_first_not_of(" \n\r\t"));
+            response.erase(response.find_last_not_of(" \n\r\t") + 1);
+            
+            if (!response.empty()) {
+              ESP_LOGD("xdm", "UART RX: %s", response.c_str());
+              // Update text sensor
+              id(scpi_response).publish_state(response);
+              // Publish response to MQTT
+              id(mqtt_client).publish("${mqtt_base_topic}/resp", response);
+            } else {
+              ESP_LOGW("xdm", "Empty response from multimeter");
+            }
+
+  - platform: mqtt_subscribe
+    name: "${friendly_name} MQTT Status"
+    id: mqtt_device_status
+    topic: ${mqtt_base_topic}/status
+    internal: true
+
+# WiFi quality publishing to MQTT
+sensor:
+  - platform: wifi_signal
+    id: mqtt_wifi_signal
+    internal: true
+    update_interval: 60s
+    on_value:
+      then:
+        - lambda: |-
+            // Calculate WiFi quality percentage (rssi + 100) * 2
+            int quality = (int)((x + 100.0) * 2.0);
+            quality = std::max(0, std::min(100, quality));
+            std::string quality_str = to_string(quality);
+            id(mqtt_client).publish("${mqtt_base_topic}/wifiquality", quality_str, 0, true);
+
+# Interval for heartbeat
+interval:
+  - interval: 60s
+    then:
+      - mqtt.publish:
+          topic: ${mqtt_base_topic}/heartbeat
+          payload: "alive"

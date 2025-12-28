@@ -1,0 +1,8 @@
+# Basic OWON XDM Remote hardware definition without MQTT
+# For MQTT support, use owon_xdm_with_mqtt.yaml instead
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/owon_xdm_base.yaml]
+    ref: main

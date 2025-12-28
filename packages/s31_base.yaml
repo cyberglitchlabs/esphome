@@ -1,6 +1,11 @@
+# Sonoff S31 hardware definition
+# Users should define their own esphome, wifi, api, ota in their device config
+
 packages:
-  core: !include core.yaml
-  device: !include sonoff_s31.yaml
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/sonoff_s31.yaml]
+    ref: main
 
 dashboard_import:
   package_import_url: github://cyberglitchlabs/esphome/packages/s31_base.yaml
