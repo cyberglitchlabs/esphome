@@ -8,6 +8,18 @@ esp32:
   framework:
     type: arduino
 
+esphome:
+  project:
+    name: "cyberglitchlabs.owon_xdm_remote"
+    version: "1.0.0"
+  on_boot:
+    - priority: 600  # Run early for logging
+      then:
+        - logger.log: "OWON XDM Remote booting..."
+    - priority: -100  # Run after everything else to initialize multimeter
+      then:
+        - script.execute: initialize_multimeter
+
 logger:
   level: DEBUG
   baud_rate: 0  # Disable UART logging to avoid conflicts with multimeter UART
@@ -131,10 +143,3 @@ script:
           transition_length: 0s
       
       - logger.log: "Multimeter initialization complete!"
-
-# Run initialization on boot
-esphome:
-  on_boot:
-    - priority: -100
-      then:
-        - script.execute: initialize_multimeter
