@@ -14,6 +14,8 @@ This repository contains modular ESPHome configurations for my personal projects
     *   `owon_xdm_mqtt.yaml`: Optional MQTT integration for OWON XDM Remote.
     *   `owon_xdm.yaml`: Bundle with core and device configs (no MQTT).
     *   `owon_xdm_with_mqtt.yaml`: Bundle with core, device, and MQTT configs.
+    *   `anavi_fume_extractor_base.yaml`: Hardware definition for ANAVI Fume Extractor (ESP8266).
+    *   `anavi_fume_extractor.yaml`: Bundle with core and device configs for ANAVI Fume Extractor.
 *   `examples/`: Example configurations for local usage.
 
 ## Usage
@@ -61,6 +63,7 @@ This repository does **not** contain a `secrets.yaml` file.
 | **Sonoff S31** | `packages/sonoff_s31.yaml` | `packages/s31_base.yaml` | N/A |
 | **Sonoff iFan04** | `packages/sonoff_ifan04.yaml` | `packages/ifan04_base.yaml` | N/A |
 | **OWON XDM Remote** | `packages/owon_xdm_base.yaml` | `packages/owon_xdm.yaml` | `packages/owon_xdm_with_mqtt.yaml` |
+| **ANAVI Fume Extractor** | `packages/anavi_fume_extractor_base.yaml` | `packages/anavi_fume_extractor.yaml` | Built-in (optional) |
 
 ## Device-Specific Documentation
 
@@ -124,6 +127,65 @@ CONF:VOLT:RANG 10
 ```
 
 **Credits:** This ESPHome port is based on the [OWON XDM Remote MicroPython project](https://github.com/Elektroarzt/owon-xdm-remote) by Elektroarzt.
+
+### ANAVI Fume Extractor
+
+**Description:** ESP8266-based smart solder smoke absorber with Wi-Fi connectivity. Features an 80mm fan with replaceable filter, mini OLED display, MQ-135 air quality sensor, and support for multiple I2C environmental sensors.
+
+**Features:**
+- 80mm fan control with physical button and relay
+- MQ-135 analog gas sensor for air quality monitoring
+- Mini OLED display (128x64) showing temperature, humidity, and air quality
+- Optional I2C sensors:
+  - HTU21D for temperature and humidity
+  - BH1750 for light measurement
+  - BMP180 for barometric pressure and temperature
+  - APDS9960 for color, gesture, and proximity detection
+- Status LED indicator
+- Built-in Home Assistant discovery support via ESPHome API
+
+**Hardware Requirements:**
+- ANAVI Fume Extractor board (ESP8266-based)
+- 80mm 5V DC fan (0.25A)
+- Replaceable activated carbon filter
+- 5V power supply with microUSB connector (1A or higher recommended)
+- See [ANAVI Fume Extractor documentation](https://github.com/AnaviTechnology/anavi-docs/blob/main/anavi-fume-extractor/anavi-fume-extractor.md) for assembly instructions
+
+**Pin Configuration:**
+- I2C: GPIO4 (SDA), GPIO5 (SCL)
+- MQ sensor: A0 (analog)
+- Status LED: GPIO16
+- Fan button: GPIO13
+- Fan relay: GPIO12
+- OLED display: I2C at 0x3C
+
+**Supported Sensors (all I2C):**
+- HTU21D (temperature & humidity) at 0x40
+- BH1750 (light) at 0x23
+- BMP180 (pressure & temperature) at 0x77
+- APDS9960 (color, gesture, proximity) at 0x39
+- MQ-135 (air quality, analog)
+
+**Basic Configuration:**
+```yaml
+packages:
+  remote_package:
+    url: github://cyberglitchlabs/esphome/packages/anavi_fume_extractor.yaml
+    ref: main
+```
+
+**Air Quality Thresholds:**
+- Good: ≤18% conductivity
+- Moderate: 19-36%
+- Unhealthy: 37-54%
+- Very Unhealthy: 55-72%
+- Hazardous: >72%
+
+**Display Pages:**
+- Status page: Shows temperature, humidity, and air quality
+- Fan active page: Displays when fan is running
+
+**Credits:** This ESPHome configuration is based on the [ANAVI Fume Extractor](https://github.com/AnaviTechnology/anavi-fume-extractor-sw) open source hardware project by ANAVI Technology.
 
 ## Installation Notes
 

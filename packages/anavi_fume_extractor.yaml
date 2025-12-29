@@ -1,0 +1,10 @@
+substitutions:
+  friendly_name: "ANAVI Fume Extractor"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+packages:
+  core: github://cyberglitchlabs/esphome/packages/core.yaml@main
+  device: github://cyberglitchlabs/esphome/packages/anavi_fume_extractor_base.yaml@main
