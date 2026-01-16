@@ -1,0 +1,46 @@
+substitutions:
+  name: "energy-monitor"
+  friendly_name: "Energy Monitor"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  platform: ESP8266
+  board: d1_mini
+
+# WiFi Configuration
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  
+  # Enable fallback hotspot in case wifi connection fails
+  ap:
+    ssid: "${friendly_name} Fallback"
+    password: ""
+
+# Enable Home Assistant API
+api:
+
+# Enable Over-The-Air updates
+ota:
+  - platform: esphome
+  - platform: web_server
+
+# Optional: Web server for direct device access
+web_server:
+  port: 80
+
+# Time sync
+time:
+  - platform: sntp
+    id: my_time
+
+# Local Package Import
+packages:
+  ads1115_ct: 
+    file: packages/current_affairs.yaml
+
+# Dashboard Import (for others to import this config as a package)
+dashboard_import:
+  package_import_url: github://cyberglitchlabs/esphome/packages/current_affairs.yaml
+  import_full_config: false

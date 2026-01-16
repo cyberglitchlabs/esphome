@@ -1,0 +1,172 @@
+substitutions:
+  # The factor for the CT clamp (10A/1V)
+  ct_factor: "10"
+  # The update interval for the sensors
+  update_interval: 60s
+  # The sample duration for the CT clamp
+  sample_duration: 1s
+
+i2c:
+  sda: GPIO4
+  scl: GPIO5
+  scan: true
+
+ads1115:
+  - address: 0x48
+    continuous_mode: true
+    id: ads48_hub
+  - address: 0x49
+    continuous_mode: true
+    id: ads49_hub
+  - address: 0x4A
+    continuous_mode: true
+    id: ads4A_hub
+  - address: 0x4B
+    continuous_mode: true
+    id: ads4B_hub
+
+sensor:
+  # ADS1115 at 0x48
+  - platform: ads1115
+    ads1115_id: ads48_hub
+    multiplexer: 'A0_A1'
+    gain: 1.024
+    sample_rate: 860SPS
+    id: ads48_0_1_raw
+    update_interval: never
+  - platform: ads1115
+    ads1115_id: ads48_hub
+    multiplexer: 'A2_A3'
+    gain: 1.024
+    sample_rate: 860SPS
+    id: ads48_2_3_raw
+    update_interval: never
+
+  # ADS1115 at 0x49
+  - platform: ads1115
+    ads1115_id: ads49_hub
+    multiplexer: 'A0_A1'
+    gain: 1.024
+    sample_rate: 860SPS
+    id: ads49_0_1_raw
+    update_interval: never
+  - platform: ads1115
+    ads1115_id: ads49_hub
+    multiplexer: 'A2_A3'
+    gain: 1.024
+    sample_rate: 860SPS
+    id: ads49_2_3_raw
+    update_interval: never
+
+  # ADS1115 at 0x4A
+  - platform: ads1115
+    ads1115_id: ads4A_hub
+    multiplexer: 'A0_A1'
+    gain: 1.024
+    sample_rate: 860SPS
+    id: ads4A_0_1_raw
+    update_interval: never
+  - platform: ads1115
+    ads1115_id: ads4A_hub
+    multiplexer: 'A2_A3'
+    gain: 1.024
+    sample_rate: 860SPS
+    id: ads4A_2_3_raw
+    update_interval: never
+
+  # ADS1115 at 0x4B
+  - platform: ads1115
+    ads1115_id: ads4B_hub
+    multiplexer: 'A0_A1'
+    gain: 1.024
+    sample_rate: 860SPS
+    id: ads4B_0_1_raw
+    update_interval: never
+  - platform: ads1115
+    ads1115_id: ads4B_hub
+    multiplexer: 'A2_A3'
+    gain: 1.024
+    sample_rate: 860SPS
+    id: ads4B_2_3_raw
+    update_interval: never
+
+  # CT Clamp Sensors
+  - platform: ct_clamp
+    sensor: ads48_0_1_raw
+    name: "Channel J1 Current"
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    accuracy_decimals: 3
+    filters:
+      - multiply: ${ct_factor}
+
+  - platform: ct_clamp
+    sensor: ads48_2_3_raw
+    name: "Channel J2 Current"
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    accuracy_decimals: 3
+    filters:
+      - multiply: ${ct_factor}
+
+  - platform: ct_clamp
+    sensor: ads49_0_1_raw
+    name: "Channel J3 Current"
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    accuracy_decimals: 3
+    filters:
+      - multiply: ${ct_factor}
+
+  - platform: ct_clamp
+    sensor: ads49_2_3_raw
+    name: "Channel J4 Current"
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    accuracy_decimals: 3
+    filters:
+      - multiply: ${ct_factor}
+
+  - platform: ct_clamp
+    sensor: ads4A_0_1_raw
+    name: "Channel J5 Current"
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    accuracy_decimals: 3
+    filters:
+      - multiply: ${ct_factor}
+
+  - platform: ct_clamp
+    sensor: ads4A_2_3_raw
+    name: "Channel J6 Current"
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    accuracy_decimals: 3
+    filters:
+      - multiply: ${ct_factor}
+
+  - platform: ct_clamp
+    sensor: ads4B_0_1_raw
+    name: "Channel J7 Current"
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    accuracy_decimals: 3
+    filters:
+      - multiply: ${ct_factor}
+
+  - platform: ct_clamp
+    sensor: ads4B_2_3_raw
+    name: "Channel J8 Current"
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    accuracy_decimals: 3
+    filters:
+      - multiply: ${ct_factor}
