@@ -34,8 +34,8 @@ web_server:
 
 # Time sync
 time:
-  - platform: sntp
-    id: my_time
+  - platform: homeassistant
+    id: esptime
 
 # Include Sonoff iFan04 hardware package
 packages:

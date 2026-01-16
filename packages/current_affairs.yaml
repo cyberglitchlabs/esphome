@@ -31,14 +31,14 @@ sensor:
     ads1115_id: ads48_hub
     multiplexer: 'A0_A1'
     gain: 1.024
-    sample_rate: 860SPS
+    sample_rate: 860
     id: ads48_0_1_raw
     update_interval: never
   - platform: ads1115
     ads1115_id: ads48_hub
     multiplexer: 'A2_A3'
     gain: 1.024
-    sample_rate: 860SPS
+    sample_rate: 860
     id: ads48_2_3_raw
     update_interval: never
 
@@ -47,14 +47,14 @@ sensor:
     ads1115_id: ads49_hub
     multiplexer: 'A0_A1'
     gain: 1.024
-    sample_rate: 860SPS
+    sample_rate: 860
     id: ads49_0_1_raw
     update_interval: never
   - platform: ads1115
     ads1115_id: ads49_hub
     multiplexer: 'A2_A3'
     gain: 1.024
-    sample_rate: 860SPS
+    sample_rate: 860
     id: ads49_2_3_raw
     update_interval: never
 
@@ -63,14 +63,14 @@ sensor:
     ads1115_id: ads4A_hub
     multiplexer: 'A0_A1'
     gain: 1.024
-    sample_rate: 860SPS
+    sample_rate: 860
     id: ads4A_0_1_raw
     update_interval: never
   - platform: ads1115
     ads1115_id: ads4A_hub
     multiplexer: 'A2_A3'
     gain: 1.024
-    sample_rate: 860SPS
+    sample_rate: 860
     id: ads4A_2_3_raw
     update_interval: never
 
@@ -79,14 +79,14 @@ sensor:
     ads1115_id: ads4B_hub
     multiplexer: 'A0_A1'
     gain: 1.024
-    sample_rate: 860SPS
+    sample_rate: 860
     id: ads4B_0_1_raw
     update_interval: never
   - platform: ads1115
     ads1115_id: ads4B_hub
     multiplexer: 'A2_A3'
     gain: 1.024
-    sample_rate: 860SPS
+    sample_rate: 860
     id: ads4B_2_3_raw
     update_interval: never
 

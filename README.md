@@ -41,6 +41,9 @@ esphome:
   name: ${name}
   friendly_name: ${friendly_name}
 
+esp8266:
+  board: esp01_1m
+
 packages:
   remote_package:
     url: github://cyberglitchlabs/esphome/packages/s31_base.yaml
@@ -211,7 +214,7 @@ packages:
 
 * 8 high-precision AC current monitoring channels
 * Native ESPHome `ct_clamp` integration for RMS calculation
-* 860 samples per second (SPS) per channel
+* 860 samples per second per channel
 * Configurable current transformation factors
 
 **Credits:** Inspired by the HackerBox 0120 "Current Affairs" project.

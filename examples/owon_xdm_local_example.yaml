@@ -34,8 +34,8 @@ web_server:
 
 # Time sync
 time:
-  - platform: sntp
-    id: my_time
+  - platform: homeassistant
+    id: esptime
 
 # Option 1: Without MQTT (ESPHome API only)
 packages:

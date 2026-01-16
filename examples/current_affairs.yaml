@@ -5,7 +5,8 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  platform: ESP8266
+
+esp8266:
   board: d1_mini
 
 # WiFi Configuration
@@ -32,13 +33,16 @@ web_server:
 
 # Time sync
 time:
-  - platform: sntp
-    id: my_time
+  - platform: homeassistant
+    id: esptime
 
 # Local Package Import
 packages:
-  ads1115_ct: 
-    file: packages/current_affairs.yaml
+  remote_package:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/current_affairs.yaml]
+    ref: main
+    refresh: 1d
 
 # Dashboard Import (for others to import this config as a package)
 dashboard_import:
