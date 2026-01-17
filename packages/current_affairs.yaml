@@ -5,6 +5,8 @@ substitutions:
   update_interval: 60s
   # The sample duration for the CT clamp
   sample_duration: 1s
+  # Nominal RMS voltage for power calculation
+  rms_voltage: "120"
 
 esphome:
   project:
@@ -99,6 +101,7 @@ sensor:
   - platform: ct_clamp
     sensor: ads48_0_1_raw
     name: "Channel J1 Current"
+    id: j1_current
     update_interval: ${update_interval}
     sample_duration: ${sample_duration}
     unit_of_measurement: "A"
@@ -109,6 +112,7 @@ sensor:
   - platform: ct_clamp
     sensor: ads48_2_3_raw
     name: "Channel J2 Current"
+    id: j2_current
     update_interval: ${update_interval}
     sample_duration: ${sample_duration}
     unit_of_measurement: "A"
@@ -119,6 +123,7 @@ sensor:
   - platform: ct_clamp
     sensor: ads49_0_1_raw
     name: "Channel J3 Current"
+    id: j3_current
     update_interval: ${update_interval}
     sample_duration: ${sample_duration}
     unit_of_measurement: "A"
@@ -129,6 +134,7 @@ sensor:
   - platform: ct_clamp
     sensor: ads49_2_3_raw
     name: "Channel J4 Current"
+    id: j4_current
     update_interval: ${update_interval}
     sample_duration: ${sample_duration}
     unit_of_measurement: "A"
@@ -139,6 +145,7 @@ sensor:
   - platform: ct_clamp
     sensor: ads4A_0_1_raw
     name: "Channel J5 Current"
+    id: j5_current
     update_interval: ${update_interval}
     sample_duration: ${sample_duration}
     unit_of_measurement: "A"
@@ -149,6 +156,7 @@ sensor:
   - platform: ct_clamp
     sensor: ads4A_2_3_raw
     name: "Channel J6 Current"
+    id: j6_current
     update_interval: ${update_interval}
     sample_duration: ${sample_duration}
     unit_of_measurement: "A"
@@ -159,6 +167,7 @@ sensor:
   - platform: ct_clamp
     sensor: ads4B_0_1_raw
     name: "Channel J7 Current"
+    id: j7_current
     update_interval: ${update_interval}
     sample_duration: ${sample_duration}
     unit_of_measurement: "A"
@@ -169,9 +178,150 @@ sensor:
   - platform: ct_clamp
     sensor: ads4B_2_3_raw
     name: "Channel J8 Current"
+    id: j8_current
     update_interval: ${update_interval}
     sample_duration: ${sample_duration}
     unit_of_measurement: "A"
     accuracy_decimals: 3
     filters:
       - multiply: ${ct_factor}
+
+  # Power Sensors (W)
+  - platform: template
+    name: "Channel J1 Power"
+    id: j1_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: return id(j1_current).state * ${rms_voltage};
+    update_interval: ${update_interval}
+  - platform: template
+    name: "Channel J2 Power"
+    id: j2_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: return id(j2_current).state * ${rms_voltage};
+    update_interval: ${update_interval}
+  - platform: template
+    name: "Channel J3 Power"
+    id: j3_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: return id(j3_current).state * ${rms_voltage};
+    update_interval: ${update_interval}
+  - platform: template
+    name: "Channel J4 Power"
+    id: j4_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: return id(j4_current).state * ${rms_voltage};
+    update_interval: ${update_interval}
+  - platform: template
+    name: "Channel J5 Power"
+    id: j5_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: return id(j5_current).state * ${rms_voltage};
+    update_interval: ${update_interval}
+  - platform: template
+    name: "Channel J6 Power"
+    id: j6_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: return id(j6_current).state * ${rms_voltage};
+    update_interval: ${update_interval}
+  - platform: template
+    name: "Channel J7 Power"
+    id: j7_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: return id(j7_current).state * ${rms_voltage};
+    update_interval: ${update_interval}
+  - platform: template
+    name: "Channel J8 Power"
+    id: j8_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    lambda: return id(j8_current).state * ${rms_voltage};
+    update_interval: ${update_interval}
+
+  # Energy Sensors (kWh)
+  - platform: total_daily_energy
+    name: "Channel J1 Energy"
+    sensor: j1_power
+    id: j1_energy
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.001
+  - platform: total_daily_energy
+    name: "Channel J2 Energy"
+    sensor: j2_power
+    id: j2_energy
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.001
+  - platform: total_daily_energy
+    name: "Channel J3 Energy"
+    sensor: j3_power
+    id: j3_energy
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.001
+  - platform: total_daily_energy
+    name: "Channel J4 Energy"
+    sensor: j4_power
+    id: j4_energy
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.001
+  - platform: total_daily_energy
+    name: "Channel J5 Energy"
+    sensor: j5_power
+    id: j5_energy
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.001
+  - platform: total_daily_energy
+    name: "Channel J6 Energy"
+    sensor: j6_power
+    id: j6_energy
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.001
+  - platform: total_daily_energy
+    name: "Channel J7 Energy"
+    sensor: j7_power
+    id: j7_energy
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.001
+  - platform: total_daily_energy
+    name: "Channel J8 Energy"
+    sensor: j8_power
+    id: j8_energy
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    filters:
+      - multiply: 0.001
