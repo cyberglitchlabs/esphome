@@ -22,5 +22,6 @@ web_server:
 # Include the hardware package
 packages:
   remote_package:
-    url: github://cyberglitchlabs/esphome/packages/ikea_vindriktning.yaml
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/ikea_vindriktning.yaml]
     ref: main
