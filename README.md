@@ -45,6 +45,7 @@ packages:
 | **OWON XDM Remote** | [Docs](docs/owon_xdm.md) | `packages/owon_xdm.yaml` |
 | **ANAVI Fume Extractor** | [Docs](docs/anavi_fume_extractor.md) | `packages/anavi_fume_extractor.yaml` |
 | **Current Affairs** | [Docs](docs/current_affairs.md) | `packages/current_affairs.yaml` |
+| **IKEA VINDRIKTNING** | [Docs](docs/ikea_vindriktning.md) | `packages/ikea_vindriktning.yaml` |
 
 ## Installation Notes
 

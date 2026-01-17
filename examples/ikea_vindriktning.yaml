@@ -1,0 +1,26 @@
+substitutions:
+  name: "ikea-vindriktning"
+  friendly_name: "IKEA VINDRIKTNING"
+  wifi_ssid: !secret wifi_ssid
+  wifi_password: !secret wifi_password
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+# Standard connectivity
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+  min_auth_mode: WPA2
+  ap: {}
+
+api:
+ota:
+web_server:
+
+# Include the hardware package
+packages:
+  remote_package:
+    url: github://cyberglitchlabs/esphome/packages/ikea_vindriktning.yaml
+    ref: main
