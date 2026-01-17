@@ -15,7 +15,5 @@ uart:
 
 sensor:
   - platform: pm1006
-    name: "Particulate Matter"
-    # The sensor provides PM2.5 measurements
-    device_class: pm25
-    state_class: measurement
+    pm_2_5:
+      name: "Particulate Matter 2.5µm Concentration"
