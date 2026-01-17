@@ -6,6 +6,11 @@ substitutions:
   # The sample duration for the CT clamp
   sample_duration: 1s
 
+esphome:
+  project:
+    name: "cyberglitchlabs.current_affairs"
+    version: "1.0.0"
+
 i2c:
   sda: GPIO4
   scl: GPIO5
