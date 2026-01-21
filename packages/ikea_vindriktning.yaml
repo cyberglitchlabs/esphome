@@ -11,15 +11,14 @@ esp8266:
 # IKEA (Rest) -> ESP8266 RX (GPIO3/RX)
 uart:
   rx_pin: D2
-  tx_pin: D1
   baud_rate: 9600
 
 sensor:
   - platform: pm1006
     pm_2_5:
       name: "Particulate Matter 2.5µm Concentration"
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 10
     update_interval: 20s
-    filters:
-      - sliding_window_moving_average:
-          window_size: 10
-          send_every: 10
