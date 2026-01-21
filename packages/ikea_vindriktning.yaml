@@ -11,6 +11,7 @@ esp8266:
 # IKEA (Rest) -> ESP8266 RX (GPIO3/RX)
 uart:
   rx_pin: D2
+  tx_pin: D1
   baud_rate: 9600
 
 sensor:
