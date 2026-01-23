@@ -10,8 +10,8 @@ esp8266:
 # Typical wiring for VINDRIKTNING is:
 # IKEA (Rest) -> ESP8266 RX (GPIO3/RX)
 uart:
-  rx_pin: D2
-  tx_pin: D1
+  rx_pin: D1
+  tx_pin: D2
   baud_rate: 9600
 
 sensor:
