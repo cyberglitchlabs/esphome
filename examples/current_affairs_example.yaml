@@ -1,0 +1,28 @@
+# Example configuration for HackerBox 0120 Current Affairs Power Monitor
+# Copy this file to your ESPHome config directory and customize
+
+substitutions:
+  name: "energy-monitor"
+  friendly_name: "Energy Monitor"
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/current_affairs.yaml]
+    ref: main
+    refresh: 1d
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "${friendly_name} Fallback"
+
+api:
+
+ota:
+  - platform: esphome
+  - platform: web_server
+
+web_server:
+  port: 80

@@ -1,0 +1,28 @@
+# Example configuration for IKEA VINDRIKTNING Air Quality Sensor
+# Copy this file to your ESPHome config directory and customize
+
+substitutions:
+  name: "air-quality-sensor"
+  friendly_name: "Air Quality Sensor"
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/ikea_vindriktning.yaml]
+    ref: main
+    refresh: 1d
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "${friendly_name} Fallback"
+
+api:
+
+ota:
+  - platform: esphome
+  - platform: web_server
+
+web_server:
+  port: 80

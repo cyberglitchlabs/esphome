@@ -1,0 +1,28 @@
+# Example configuration for Sonoff S31
+# Copy this file to your ESPHome config directory and customize
+
+substitutions:
+  name: "living-room-plug"
+  friendly_name: "Living Room Plug"
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/s31_base.yaml]
+    ref: main
+    refresh: 1d
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "${friendly_name} Fallback"
+
+api:
+
+ota:
+  - platform: esphome
+  - platform: web_server
+
+web_server:
+  port: 80

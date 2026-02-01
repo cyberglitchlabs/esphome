@@ -1,3 +1,10 @@
+substitutions:
+  friendly_name: "IKEA VINDRIKTNING"
+
+dashboard_import:
+  package_import_url: github://cyberglitchlabs/esphome/packages/ikea_vindriktning.yaml
+  import_full_config: false
+
 esphome:
   project:
     name: "cyberglitchlabs.ikea_vindriktning"
@@ -5,6 +12,9 @@ esphome:
 
 esp8266:
   board: esp01_1m
+
+logger:
+  baud_rate: 0  # Disable UART logging to avoid conflicts with PM1006
 
 # The PM1006 sensor uses UART to communicate.
 # Typical wiring for VINDRIKTNING is:
@@ -17,9 +27,32 @@ uart:
 sensor:
   - platform: pm1006
     pm_2_5:
-      name: "Particulate Matter 2.5µm Concentration"
+      name: "${friendly_name} PM 2.5"
 #      filters:
 #        - sliding_window_moving_average:
 #            window_size: 10
 #            send_every: 10
     update_interval: 20s
+
+  - platform: uptime
+    name: "${friendly_name} Uptime"
+    entity_category: diagnostic
+
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal"
+    entity_category: diagnostic
+    update_interval: 60s
+
+binary_sensor:
+  - platform: status
+    name: "${friendly_name} Status"
+    entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: "${friendly_name} Restart"
+    entity_category: config
+
+  - platform: safe_mode
+    name: "${friendly_name} Safe Mode"
+    entity_category: config

@@ -1,13 +1,13 @@
 substitutions:
-  name: "bedroom-fan"
-  friendly_name: "Bedroom Fan"
+  name: "dryer"
+  friendly_name: "Dryer"
 
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
 
 dashboard_import:
-  package_import_url: github://cyberglitchlabs/esphome/packages/ifan04_base.yaml
+  package_import_url: github://cyberglitchlabs/esphome/packages/s31_base.yaml
   import_full_config: false
 
 # WiFi Configuration
@@ -23,11 +23,13 @@ wifi:
 
 # Enable Home Assistant API
 api:
+  encryption:
+    key: !secret api_encryption_key
 
 # Enable Over-The-Air updates
 ota:
   - platform: esphome
-  - platform: web_server
+    password: !secret ota_password
 
 # Optional: Web server for direct device access
 web_server:
@@ -38,10 +40,10 @@ time:
   - platform: homeassistant
     id: esptime
 
-# Include Sonoff iFan04 hardware package
+# Include Sonoff S31 hardware package from GitHub
 packages:
-  remote_package:
+  device:
     url: https://github.com/cyberglitchlabs/esphome
-    files: [packages/ifan04_base.yaml]
+    files: [packages/s31_base.yaml]
     ref: main
     refresh: 1d

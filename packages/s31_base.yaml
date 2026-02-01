@@ -1,11 +1,17 @@
-# Sonoff S31 hardware definition
+# Sonoff S31 Hardware Package
 # Users should define their own esphome, wifi, api, ota in their device config
+#
+# Usage (in your device yaml):
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/s31_base.yaml]
+#       ref: main
 
-packages:
-  device:
-    url: https://github.com/cyberglitchlabs/esphome
-    files: [packages/sonoff_s31.yaml]
-    ref: main
+substitutions:
+  friendly_name: "Sonoff S31"
+  # Relay restore mode: ALWAYS_OFF, ALWAYS_ON, RESTORE_DEFAULT_OFF, RESTORE_DEFAULT_ON
+  relay_restore_mode: "ALWAYS_OFF"
 
 dashboard_import:
   package_import_url: github://cyberglitchlabs/esphome/packages/s31_base.yaml
@@ -15,3 +21,137 @@ esphome:
   project:
     name: "cyberglitchlabs.sonoff_s31"
     version: "1.0.0"
+
+esp8266:
+  board: esp12e
+  early_pin_init: false
+  restore_from_flash: false
+
+logger:
+  baud_rate: 0 # (UART logging interferes with cse7766)
+  logs:
+    sensor: DEBUG # (Override any global setting, VERBOSE will spam the cse7766 sensors)
+
+uart:
+  rx_pin: RX
+  baud_rate: 4800
+  parity: EVEN
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: True
+    name: "${friendly_name} Button"
+    on_press:
+      - switch.toggle: relay
+  - platform: status
+    name: "${friendly_name} Status"
+    entity_category: diagnostic
+
+sensor:
+  - platform: wifi_signal
+    name: "${friendly_name} WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: "${friendly_name} Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: cse7766
+    current:
+      name: "${friendly_name} Current"
+      accuracy_decimals: 2
+      device_class: current
+      state_class: measurement
+      filters:
+        - throttle_average: 60s
+    voltage:
+      name: "${friendly_name} Voltage"
+      accuracy_decimals: 2
+      device_class: voltage
+      state_class: measurement
+      filters:
+        - throttle_average: 60s
+    power:
+      name: "${friendly_name} Power"
+      accuracy_decimals: 2
+      id: my_power
+      device_class: power
+      state_class: measurement
+      # Update every 5s for ha_washdata cycle detection (shape-correlation matching)
+      # while still providing smoothing to reduce noise
+      filters:
+        # Skip brief power spikes < 1s (prevents false triggers in ha_washdata)
+        - skip_initial: 1
+        # Smooth out noise while maintaining responsiveness
+        - sliding_window_moving_average:
+            window_size: 3
+            send_every: 1
+        - throttle_average: 5s
+    energy:
+      name: "${friendly_name} Energy"
+      accuracy_decimals: 2
+      device_class: energy
+      state_class: total_increasing
+      filters:
+        - throttle: 60s
+    apparent_power: #(only available with version 2024.3.0 or greater)
+      name: "${friendly_name} Apparent Power"
+      device_class: apparent_power
+      state_class: measurement
+      filters:
+        - throttle_average: 60s
+    power_factor: #(only available with version 2024.3.0 or greater)
+      name: "${friendly_name} Power Factor"
+      accuracy_decimals: 2
+      device_class: power_factor
+      state_class: measurement
+      filters:
+        - throttle_average: 60s
+
+  # Daily energy in Wh (high precision for small devices)
+  - platform: total_daily_energy
+    name: "${friendly_name} Daily Energy"
+    power_id: my_power
+    accuracy_decimals: 2
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: "Wh"
+    method: trapezoid
+
+  # Daily energy in kWh (preferred for HA Energy dashboard)
+  - platform: total_daily_energy
+    name: "${friendly_name} Daily Energy kWh"
+    power_id: my_power
+    accuracy_decimals: 3
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: "kWh"
+    method: trapezoid
+    filters:
+      - multiply: 0.001
+
+switch:
+  - platform: gpio
+    name: "${friendly_name} Relay"
+    pin: GPIO12
+    id: relay
+    restore_mode: ${relay_restore_mode}
+
+button:
+  - platform: restart
+    name: "${friendly_name} Restart"
+    entity_category: config
+
+  - platform: safe_mode
+    name: "${friendly_name} Safe Mode"
+    entity_category: config
+
+status_led:
+  pin:
+    number: GPIO13
+    inverted: True

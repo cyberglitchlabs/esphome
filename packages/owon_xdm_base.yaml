@@ -1,12 +1,22 @@
+# OWON XDM Remote hardware definition
+# Complete package for ESP32-C3 based OWON XDM1041 multimeter remote control
+# Users should define their own esphome, wifi, api, ota in their device config
+#
+# Features:
+# - UART communication with OWON XDM1041 via SCPI protocol
+# - Status LED control
+# - WiFi connectivity
+# - Automatic multimeter initialization on boot
+# - High sampling rate (RATE F) configuration
+
 substitutions:
   friendly_name: "OWON XDM Remote"
   # Default command timeout in seconds
   command_timeout: "1.0"
 
-esp32:
-  board: esp32-c3-devkitm-1
-  framework:
-    type: arduino
+dashboard_import:
+  package_import_url: github://cyberglitchlabs/esphome/packages/owon_xdm_base.yaml
+  import_full_config: false
 
 esphome:
   project:
@@ -19,6 +29,11 @@ esphome:
     - priority: -100  # Run after everything else to initialize multimeter
       then:
         - script.execute: initialize_multimeter
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
 
 logger:
   level: DEBUG
@@ -48,6 +63,15 @@ light:
     id: status_led
     internal: true
 
+button:
+  - platform: restart
+    name: '${friendly_name} Restart'
+    entity_category: diagnostic
+
+  - platform: safe_mode
+    name: '${friendly_name} Safe Mode'
+    entity_category: config
+
 # Text sensors for SCPI responses and status
 text_sensor:
   - platform: template
@@ -55,17 +79,39 @@ text_sensor:
     id: scpi_response
     icon: "mdi:message-text"
 
+  - platform: version
+    name: '${friendly_name} ESPHome Version'
+    entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      name: ${friendly_name} WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: ${friendly_name} WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: ${friendly_name} WiFi MAC Address
+      entity_category: diagnostic
+
 # Sensors
 sensor:
+  - platform: uptime
+    name: '${friendly_name} Uptime'
+    entity_category: diagnostic
+    unit_of_measurement: s
+
   - platform: wifi_signal
     name: "${friendly_name} WiFi Signal"
     id: wifi_signal_sensor
+    entity_category: diagnostic
     update_interval: 60s
 
 # Binary sensors for device connectivity
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
+    entity_category: diagnostic
 
 # Startup sequence to initialize the multimeter
 script:
