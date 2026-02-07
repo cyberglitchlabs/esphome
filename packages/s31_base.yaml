@@ -33,6 +33,10 @@ logger:
   logs:
     sensor: DEBUG # (Override any global setting, VERBOSE will spam the cse7766 sensors)
 
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
 uart:
   rx_pin: RX
   baud_rate: 4800
