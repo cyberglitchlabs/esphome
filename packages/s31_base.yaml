@@ -18,6 +18,7 @@ dashboard_import:
   import_full_config: false
 
 esphome:
+  name: sonoff-s31
   project:
     name: "cyberglitchlabs.sonoff_s31"
     version: "1.0.0"
