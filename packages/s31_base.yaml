@@ -9,6 +9,7 @@
 #       ref: main
 
 substitutions:
+  name: "sonoff-s31"
   friendly_name: "Sonoff S31"
   # Relay restore mode: ALWAYS_OFF, ALWAYS_ON, RESTORE_DEFAULT_OFF, RESTORE_DEFAULT_ON
   relay_restore_mode: "ALWAYS_OFF"
@@ -18,7 +19,7 @@ dashboard_import:
   import_full_config: false
 
 esphome:
-  name: sonoff-s31
+  name: ${name}
   project:
     name: "cyberglitchlabs.sonoff_s31"
     version: "1.0.0"
