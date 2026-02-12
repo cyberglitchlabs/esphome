@@ -148,7 +148,7 @@ switch:
     id: relay
     restore_mode: ${relay_restore_mode}
 
-  safe_mode:
+safe_mode:
 
 button:
   - platform: restart
