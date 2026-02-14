@@ -9,9 +9,6 @@ substitutions:
 esphome:
   name: my-plug
   friendly_name: "${friendly_name}"
-  project:
-    name: "cyberglitchlabs.sonoff_s31"
-    version: "1.0.0"
 
 packages:
   device:

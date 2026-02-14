@@ -19,6 +19,11 @@ substitutions:
   # Relay restore mode: ALWAYS_OFF, ALWAYS_ON, RESTORE_DEFAULT_OFF, RESTORE_DEFAULT_ON
   relay_restore_mode: "ALWAYS_OFF"
 
+esphome:
+  project:
+    name: "cyberglitchlabs.sonoff_s31"
+    version: "1.0.0"
+
 esp8266:
   board: esp12e
   early_pin_init: false
