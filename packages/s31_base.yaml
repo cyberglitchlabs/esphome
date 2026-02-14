@@ -1,7 +1,13 @@
 # Sonoff S31 Hardware Package
-# Users should define their own esphome, wifi, api, ota in their device config
+# This package provides hardware-specific configuration only.
+# Users must define esphome, wifi, api, ota, and time in their device config.
 #
-# Usage (in your device yaml):
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
 #   packages:
 #     device:
 #       url: https://github.com/cyberglitchlabs/esphome
@@ -9,20 +15,9 @@
 #       ref: main
 
 substitutions:
-  name: "sonoff-s31"
   friendly_name: "Sonoff S31"
   # Relay restore mode: ALWAYS_OFF, ALWAYS_ON, RESTORE_DEFAULT_OFF, RESTORE_DEFAULT_ON
   relay_restore_mode: "ALWAYS_OFF"
-
-dashboard_import:
-  package_import_url: github://cyberglitchlabs/esphome/packages/s31_base.yaml
-  import_full_config: false
-
-esphome:
-  name: ${name}
-  project:
-    name: "cyberglitchlabs.sonoff_s31"
-    version: "1.0.0"
 
 esp8266:
   board: esp12e
