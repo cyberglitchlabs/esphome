@@ -1,6 +1,18 @@
-# ANAVI Fume Extractor hardware definition
-# Complete package for ANAVI Fume Extractor with sensors and OLED display
-# Users should define their own esphome, wifi, api, ota in their device config
+# ANAVI Fume Extractor Hardware Package
+# This package provides hardware-specific configuration only.
+# Users must define esphome, wifi, api, ota, and time in their device config.
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/anavi_fume_extractor.yaml]
+#       ref: main
 #
 # Features:
 # - Fan relay control with physical button
@@ -15,10 +27,6 @@
 substitutions:
   friendly_name: "ANAVI Fume Extractor"
 
-dashboard_import:
-  package_import_url: github://cyberglitchlabs/esphome/packages/anavi_fume_extractor.yaml
-  import_full_config: false
-
 esphome:
   project:
     name: "anavi.fume_extractor"
@@ -30,6 +38,10 @@ esp8266:
 
 logger:
   level: DEBUG
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
 
 # I2C Bus for all sensors and OLED display
 i2c:

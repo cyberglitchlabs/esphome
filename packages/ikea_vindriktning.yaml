@@ -1,9 +1,21 @@
+# IKEA VINDRIKTNING Hardware Package
+# This package provides hardware-specific configuration only.
+# Users must define esphome, wifi, api, ota, and time in their device config.
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/ikea_vindriktning.yaml]
+#       ref: main
+
 substitutions:
   friendly_name: "IKEA VINDRIKTNING"
-
-dashboard_import:
-  package_import_url: github://cyberglitchlabs/esphome/packages/ikea_vindriktning.yaml
-  import_full_config: false
 
 esphome:
   project:
@@ -15,6 +27,10 @@ esp8266:
 
 logger:
   baud_rate: 0  # Disable UART logging to avoid conflicts with PM1006
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
 
 # The PM1006 sensor uses UART to communicate.
 # Typical wiring for VINDRIKTNING is:

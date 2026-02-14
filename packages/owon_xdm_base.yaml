@@ -1,11 +1,22 @@
-# OWON XDM Remote hardware definition
-# Complete package for ESP32-C3 based OWON XDM1041 multimeter remote control
-# Users should define their own esphome, wifi, api, ota in their device config
+# OWON XDM Remote Hardware Package
+# This package provides hardware-specific configuration only.
+# Users must define esphome, wifi, api, ota, and time in their device config.
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/owon_xdm_base.yaml]
+#       ref: main
 #
 # Features:
 # - UART communication with OWON XDM1041 via SCPI protocol
 # - Status LED control
-# - WiFi connectivity
 # - Automatic multimeter initialization on boot
 # - High sampling rate (RATE F) configuration
 
@@ -13,10 +24,6 @@ substitutions:
   friendly_name: "OWON XDM Remote"
   # Default command timeout in seconds
   command_timeout: "1.0"
-
-dashboard_import:
-  package_import_url: github://cyberglitchlabs/esphome/packages/owon_xdm_base.yaml
-  import_full_config: false
 
 esphome:
   project:
@@ -38,6 +45,10 @@ esp32:
 logger:
   level: DEBUG
   baud_rate: 0  # Disable UART logging to avoid conflicts with multimeter UART
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
 
 # UART configuration for OWON XDM1041
 uart:

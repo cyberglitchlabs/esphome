@@ -1,6 +1,18 @@
-# Sonoff iFan04 hardware definition
-# Complete package for controlling Sonoff iFan04 ceiling fan controller
-# Users should define their own esphome, wifi, api, ota in their device config
+# Sonoff iFan04 Hardware Package
+# This package provides hardware-specific configuration only.
+# Users must define esphome, wifi, api, ota, and time in their device config.
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/ifan04_base.yaml]
+#       ref: main
 #
 # Features:
 # - 3-speed fan control via capacitor switching
@@ -25,10 +37,6 @@ substitutions:
   code_rc_unpair:  "O"    # ---
   code_short:      "E"    # .
   code_long:       "T"    # -
-
-dashboard_import:
-  package_import_url: github://cyberglitchlabs/esphome/packages/ifan04_base.yaml
-  import_full_config: false
 
 esphome:
   project:
@@ -62,6 +70,10 @@ preferences:
 logger:
   baud_rate: 0
   level: INFO
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
 
 # RF Remote Receiver
 uart:
