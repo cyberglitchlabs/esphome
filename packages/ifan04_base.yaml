@@ -167,9 +167,6 @@ morse_code:
   output: buzzer
   dit_duration: 50
 
-web_server:
-  port: 80
-
 api:
   reboot_timeout: 0s
   actions:
