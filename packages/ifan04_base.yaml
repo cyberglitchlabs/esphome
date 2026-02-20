@@ -42,6 +42,8 @@ esphome:
   project:
     name: "cyberglitchlabs.sonoff_ifan04"
     version: "1.0.0"
+  platformio_options:
+    board_build.flash_size: 2MB
   on_boot:
     - priority: 600
       then:
@@ -60,7 +62,6 @@ external_components:
 
 esp8266:
   board: esp8285
-  flash_size: 2MB
   early_pin_init: false
   restore_from_flash: true
   framework:
