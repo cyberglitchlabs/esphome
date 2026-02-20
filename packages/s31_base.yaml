@@ -99,6 +99,9 @@ sensor:
             window_size: 3
             send_every: 1
         - throttle_average: 5s
+        # Guarantee a heartbeat even when power is stable/zero so that
+        # ha_washdata off-delay and watchdog timers always receive fresh updates
+        - heartbeat: 5s
     energy:
       name: "Energy"
       accuracy_decimals: 2
