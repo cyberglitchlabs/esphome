@@ -165,20 +165,20 @@ morse_code:
 
 light:
   - platform: binary
-    name: '${friendly_name} Light'
+    name: 'Light'
     id: light_comp
     output: light_relay
 
 fan:
   - platform: speed
-    name: '${friendly_name} Fan'
+    name: 'Fan'
     id: fan_comp
     output: fan_relays
     speed_count: 3
 
 switch:
   - platform: template
-    name: '${friendly_name} Buzzer enabled'
+    name: 'Buzzer enabled'
     id: buzzer_enabled
     entity_category: config
     optimistic: True
@@ -196,13 +196,13 @@ switch:
           then:
             - morse_code.start: $code_buzzer_off
   - platform: template
-    name: '${friendly_name} Light enabled'
+    name: 'Light enabled'
     id: light_enabled
     entity_category: config
     optimistic: True
     restore_mode: RESTORE_DEFAULT_ON
   - platform: template
-    name: '${friendly_name} Fan startup-boost enabled'
+    name: 'Fan startup-boost enabled'
     id: fan_boost_enabled
     entity_category: config
     optimistic: True
@@ -210,26 +210,26 @@ switch:
 
 button:
   - platform: restart
-    name: '${friendly_name} Restart'
+    name: 'Restart'
     entity_category: diagnostic
 
   - platform: safe_mode
-    name: '${friendly_name} Safe Mode'
+    name: 'Safe Mode'
     entity_category: config
 
 sensor:
   - platform: uptime
-    name: '${friendly_name} Uptime'
+    name: 'Uptime'
     entity_category: diagnostic
     unit_of_measurement: s
   - platform: wifi_signal
     id: wifi_signal_db
-    name: '${friendly_name} WiFi Signal dB'
+    name: 'WiFi Signal dB'
     entity_category: diagnostic
   - platform: copy
     id: wifi_signal_rel
     source_id: wifi_signal_db
-    name: "${friendly_name} WiFi Signal"
+    name: "WiFi Signal"
     entity_category: diagnostic
     filters:
       - lambda: |-
@@ -239,30 +239,30 @@ sensor:
 
 binary_sensor:
   - platform: gpio
-    name: "${friendly_name} Button"
+    name: "Button"
     pin:
       number: GPIO00
       inverted: true
   - platform: status
-    name: "${friendly_name} Status"
+    name: "Status"
     entity_category: diagnostic
   - platform: template
-    name: "${friendly_name} RC button light"
+    name: "RC button light"
     id: rc_button_light
     filters:
       - delayed_off: 300ms
   - platform: template
-    name: "${friendly_name} RC button RF/WiFi"
+    name: "RC button RF/WiFi"
     id: rc_button_rfwifi
     filters:
       - delayed_off: 300ms
   - platform: template
-    name: "${friendly_name} RC button WiFi (long)"
+    name: "RC button WiFi (long)"
     id: rc_button_wifi_long
     filters:
       - delayed_off: 300ms
   - platform: template
-    name: "${friendly_name} RC button RF (long)"
+    name: "RC button RF (long)"
     id: rc_button_rf_long
     filters:
       - delayed_off: 300ms
@@ -366,20 +366,20 @@ ifan_remote:
 
 text_sensor:
   - platform: version
-    name: '${friendly_name} ESPHome Version'
+    name: 'ESPHome Version'
     entity_category: diagnostic
   - platform: wifi_info
     ip_address:
-      name: ${friendly_name} WiFi IP Address
+      name: WiFi IP Address
       entity_category: diagnostic
     ssid:
-      name: ${friendly_name} WiFi SSID
+      name: WiFi SSID
       entity_category: diagnostic
     mac_address:
-      name: ${friendly_name} WiFi MAC Address
+      name: WiFi MAC Address
       entity_category: diagnostic
     dns_address:
-      name: ${friendly_name} WiFi DNS Address
+      name: WiFi DNS Address
       entity_category: diagnostic
 
 globals:
