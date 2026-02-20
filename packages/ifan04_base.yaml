@@ -62,6 +62,8 @@ esp8266:
   board: esp8285
   early_pin_init: false
   restore_from_flash: true
+  framework:
+    version: latest
 
 preferences:
   flash_write_interval: 5min
@@ -162,6 +164,15 @@ output:
 morse_code:
   output: buzzer
   dit_duration: 50
+
+api:
+  reboot_timeout: 0s
+  actions:
+    - action: play_morse_code
+      variables:
+        code: string
+      then:
+        - morse_code.start: !lambda 'return code;'
 
 light:
   - platform: binary
