@@ -16,6 +16,7 @@ jobs:
           - tests/test_ifan04.yaml
           - tests/test_owon_xdm.yaml
           - tests/test_wopr.yaml
+          - tests/test_rv_tv.yaml
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4

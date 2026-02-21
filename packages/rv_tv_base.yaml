@@ -1,0 +1,263 @@
+# RV TV Motor Lift Hardware Package
+# This package provides hardware-specific configuration for an ESP32-based
+# RV TV motor lift controller. It manages a two-relay H-bridge motor driver,
+# two ADC position sensors (raised/lowered limit switches via voltage divider),
+# a physical momentary push button, and a TV power relay.
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Substitution defaults (override before packages: key):
+#   tv_power_pin: GPIO26      - TV power relay GPIO
+#   motor_up_pin: GPIO32      - Motor up relay GPIO
+#   motor_down_pin: GPIO33    - Motor down relay GPIO
+#   button_pin: GPIO19        - Physical lift button GPIO
+#   adc_lowered_pin: GPIO35   - ADC pin for lowered limit sensor
+#   adc_raised_pin: GPIO34    - ADC pin for raised limit sensor
+#   adc_threshold: "2.5"      - Voltage threshold for limit detection
+#   adc_update_interval: 50ms - ADC polling rate
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/rv_tv_base.yaml]
+#       ref: main
+
+substitutions:
+  tv_power_pin: GPIO26
+  motor_up_pin: GPIO32
+  motor_down_pin: GPIO33
+  button_pin: GPIO19
+  adc_lowered_pin: GPIO35
+  adc_raised_pin: GPIO34
+  adc_threshold: "2.5"
+  adc_update_interval: 50ms
+
+esphome:
+  project:
+    name: cyberglitchlabs.rv_tv_lift
+    version: "1.0"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+api:
+  reboot_timeout: 0s
+
+logger:
+  level: INFO
+  baud_rate: 0
+
+# Global variables to track TV state and movement direction
+globals:
+  - id: tv_in_transit
+    type: bool
+    initial_value: "false"
+  - id: tv_moving_up
+    type: bool
+    initial_value: "true"
+  - id: tv_last_stopped
+    type: bool
+    initial_value: "false"  # false = stopped while moving down, true = stopped while moving up
+
+sensor:
+  - platform: adc
+    pin: ${adc_lowered_pin}
+    id: tv_lowered_voltage
+    name: "TV Lowered Voltage"
+    update_interval: ${adc_update_interval}
+    attenuation: auto
+    entity_category: diagnostic
+    filters:
+      - multiply: 3.3
+      - median:
+          window_size: 3
+          send_every: 1
+          send_first_at: 1
+      - exponential_moving_average:
+          alpha: 0.3
+          send_every: 1
+
+  - platform: adc
+    pin: ${adc_raised_pin}
+    id: tv_raised_voltage
+    name: "TV Raised Voltage"
+    update_interval: ${adc_update_interval}
+    attenuation: auto
+    entity_category: diagnostic
+    filters:
+      - multiply: 3.3
+      - median:
+          window_size: 3
+          send_every: 1
+          send_first_at: 1
+      - exponential_moving_average:
+          alpha: 0.3
+          send_every: 1
+
+  - platform: template
+    name: "TV Position"
+    id: tv_position
+    update_interval: 1s
+    device_class: ""
+    state_class: measurement
+    unit_of_measurement: "%"
+    icon: "mdi:television"
+    lambda: |-
+      if (id(tv_lowered).state) {
+        return 0;
+      } else if (id(tv_raised).state) {
+        return 100;
+      } else {
+        return 50;
+      }
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
+binary_sensor:
+  - platform: template
+    name: "TV Lowered"
+    id: tv_lowered
+    lambda: |-
+      return (id(tv_lowered_voltage).state > ${adc_threshold});
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+      - invert:
+    on_state:
+      - if:
+          condition:
+            lambda: 'return id(tv_lowered).state == true;'
+          then:
+            - switch.turn_off: relay_motor_up
+            - switch.turn_off: relay_motor_down
+            - switch.turn_on: relay_tv_power
+            - lambda: |-
+                id(tv_in_transit) = false;
+                ESP_LOGI("sensor", "TV is fully lowered. Stopping motor.");
+
+  - platform: template
+    name: "TV Raised"
+    id: tv_raised
+    lambda: |-
+      return (id(tv_raised_voltage).state > ${adc_threshold});
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+      - invert:
+    on_state:
+      - if:
+          condition:
+            lambda: 'return id(tv_raised).state == true;'
+          then:
+            - switch.turn_off: relay_motor_up
+            - switch.turn_off: relay_motor_down
+            - switch.turn_off: relay_tv_power
+            - lambda: |-
+                id(tv_in_transit) = false;
+                ESP_LOGI("sensor", "TV is fully raised. Stopping motor.");
+
+  - platform: gpio
+    pin:
+      number: ${button_pin}
+      mode: INPUT_PULLUP
+    name: "TV Lift Button"
+    id: tv_lift_button
+    entity_category: diagnostic
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+    on_press:
+      then:
+        - lambda: |-
+            if (id(tv_in_transit)) {
+              id(relay_motor_up).turn_off();
+              id(relay_motor_down).turn_off();
+              id(tv_last_stopped) = id(tv_moving_up);
+              id(tv_in_transit) = false;
+              ESP_LOGI("button", "TV movement stopped.");
+            } else {
+              if (id(tv_lowered).state) {
+                id(relay_motor_up).turn_on();
+                id(tv_in_transit) = true;
+                id(tv_moving_up) = true;
+                ESP_LOGI("button", "Starting upward movement.");
+              } else if (id(tv_raised).state) {
+                id(relay_motor_down).turn_on();
+                id(tv_in_transit) = true;
+                id(tv_moving_up) = false;
+                ESP_LOGI("button", "Starting downward movement.");
+              } else {
+                if (id(tv_last_stopped)) {
+                  id(relay_motor_down).turn_on();
+                  id(tv_in_transit) = true;
+                  id(tv_moving_up) = false;
+                  ESP_LOGI("button", "Reversing to downward movement.");
+                } else {
+                  id(relay_motor_up).turn_on();
+                  id(tv_in_transit) = true;
+                  id(tv_moving_up) = true;
+                  ESP_LOGI("button", "Reversing to upward movement.");
+                }
+              }
+            }
+
+  - platform: status
+    name: "Status"
+    entity_category: diagnostic
+
+switch:
+  - platform: gpio
+    pin: ${tv_power_pin}
+    name: "TV Power"
+    id: relay_tv_power
+
+  - platform: gpio
+    pin: ${motor_up_pin}
+    name: "Motor Up"
+    id: relay_motor_up
+    entity_category: config
+    interlock: [relay_motor_down]
+
+  - platform: gpio
+    pin: ${motor_down_pin}
+    name: "Motor Down"
+    id: relay_motor_down
+    entity_category: config
+    interlock: [relay_motor_up]
+
+button:
+  - platform: restart
+    name: "Restart"
+    entity_category: config
+  - platform: safe_mode
+    name: "Safe Mode"
+    entity_category: config
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: diagnostic
+  - platform: wifi_info
+    ip_address:
+      name: WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: WiFi MAC Address
+      entity_category: diagnostic

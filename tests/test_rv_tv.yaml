@@ -1,0 +1,21 @@
+substitutions:
+  name: rv-tv
+  friendly_name: "RV TV Lift"
+  wifi_ssid: test_ssid
+  wifi_password: test_password
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+
+api:
+
+ota:
+  - platform: esphome
+
+packages:
+  base: !include ../packages/rv_tv_base.yaml
