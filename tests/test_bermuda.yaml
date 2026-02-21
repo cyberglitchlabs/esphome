@@ -1,0 +1,25 @@
+substitutions:
+  name: "test-bermuda"
+  friendly_name: "Test Bermuda"
+  wifi_ssid: "TestSSID"
+  wifi_password: "TestPassword"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+# WiFi Configuration for testing
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+
+# Enable Home Assistant API
+api:
+
+# Enable Over-The-Air updates
+ota:
+  - platform: esphome
+
+packages:
+  # Using local path for CI to test changes in the PR
+  base: !include ../packages/bermuda_base.yaml

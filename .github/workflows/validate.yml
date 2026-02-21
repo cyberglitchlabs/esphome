@@ -18,6 +18,7 @@ jobs:
           - tests/test_wopr.yaml
           - tests/test_rv_tv.yaml
           - tests/test_plant_bot.yaml
+          - tests/test_bermuda.yaml
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4

@@ -1,0 +1,36 @@
+# Example configuration for Bermuda BLE Proxy (wemos_d1_mini32 / generic ESP32)
+# Copy this into your ESPHome device configuration and customize.
+# See: https://github.com/agittins/bermuda for the Bermuda HA integration.
+
+substitutions:
+  friendly_name: "Bermuda Proxy"
+  # BLE scan window. Reduce if device is unstable. Must be <= ble_scan_interval.
+  ble_scan_interval: "320ms"
+  ble_scan_window: "300ms"
+
+esphome:
+  name: bermuda-livingroom
+  friendly_name: "${friendly_name}"
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/bermuda_base.yaml]
+    ref: main
+    refresh: 1d
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  min_auth_mode: WPA2
+  ap:
+    ssid: "${friendly_name} Fallback"
+    password: ""
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
