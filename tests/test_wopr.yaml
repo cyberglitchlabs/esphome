@@ -1,0 +1,27 @@
+substitutions:
+  name: wopr-test
+  friendly_name: "WOPR Test"
+  wifi_ssid: test_ssid
+  wifi_password: test_password
+  weather_entity: sensor.test_temperature
+
+esphome:
+  name: ${name}
+  friendly_name: "${friendly_name}"
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+
+api:
+
+ota:
+  - platform: esphome
+
+packages:
+  base: !include ../packages/wopr_base.yaml

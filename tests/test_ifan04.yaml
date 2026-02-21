@@ -20,11 +20,6 @@ api:
 ota:
   - platform: esphome
 
-# Time sync
-time:
-  - platform: sntp
-    id: my_time
-
 packages:
   # Using local path for CI to test changes in the PR
   base: !include ../packages/ifan04_base.yaml

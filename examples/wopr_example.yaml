@@ -1,0 +1,38 @@
+# Example configuration for HackerBox #0114 WOPR Blinkenlights
+# Copy this into your ESPHome device configuration and customize.
+#
+# Hardware: ESP32-C3 Supermini + 3x MAX7219 8x32 dot matrix modules (96x8 px)
+# Product: https://hackerboxes.com/products/hackerbox-0114-wopr
+
+substitutions:
+  friendly_name: "WOPR Blinkenlights"
+  # Optional overrides:
+  # weather_entity: sensor.openweathermap_temperature
+  # max7219_intensity: "8"
+
+esphome:
+  name: wopr
+  friendly_name: "${friendly_name}"
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/wopr_base.yaml]
+    ref: main
+    refresh: 1d
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  min_auth_mode: WPA2
+  ap:
+    ssid: "${friendly_name} Fallback"
+    password: ""
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password

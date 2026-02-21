@@ -15,6 +15,7 @@ jobs:
           - tests/test_s31.yaml
           - tests/test_ifan04.yaml
           - tests/test_owon_xdm.yaml
+          - tests/test_wopr.yaml
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4

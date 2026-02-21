@@ -1,0 +1,169 @@
+# HackerBox #0114 WOPR Hardware Package
+# This package provides hardware-specific configuration for the WOPR Blinkenlights
+# display device based on the ESP32-C3 Supermini with three chained MAX7219 8x32
+# dot matrix display modules (96x8 pixel total).
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/wopr_base.yaml]
+#       ref: main
+
+substitutions:
+  friendly_name: "WOPR Blinkenlights"
+  max7219_clk_pin: GPIO4
+  max7219_data_pin: GPIO6
+  max7219_cs_pin: GPIO7
+  max7219_num_chained: "12"  # 3 modules x 4 chips/module
+  max7219_intensity: "8"     # 0-15 display brightness
+  weather_entity: sensor.openweathermap_temperature
+
+esphome:
+  project:
+    name: cyberglitchlabs.hackerbox_wopr
+    version: "1.0.0"
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+
+api:
+  reboot_timeout: 0s
+
+logger:
+
+time:
+  - platform: homeassistant
+    id: home_time
+
+web_server:
+  port: 80
+
+# ---------------------------------------------------------------------------
+# Hardware: Display
+# ---------------------------------------------------------------------------
+
+spi:
+  id: spi_bus
+  clk_pin: ${max7219_clk_pin}
+  mosi_pin: ${max7219_data_pin}
+
+globals:
+  - id: display_mode
+    type: int
+    initial_value: "1"
+
+font:
+  - file: "gfonts://Press+Start+2P"
+    id: digit_font
+    size: 8
+
+display:
+  - platform: max7219digit
+    id: wopr_display
+    cs_pin: ${max7219_cs_pin}
+    num_chips: ${max7219_num_chained}
+    spi_id: spi_bus
+    intensity: ${max7219_intensity}
+    lambda: |-
+      switch (id(display_mode)) {
+        case 1:
+          if (id(home_time).now().is_valid()) {
+            it.strftime(0, 0, id(digit_font), " %a, %b %d %H:%M ", id(home_time).now());
+          }
+          break;
+        case 2:
+          it.printf(0, 0, id(digit_font), "Currently %.1f", id(outside_temperature).state);
+          break;
+        case 3:
+          it.fill(COLOR_OFF);
+          for (int i = 0; i < 60; i++) {
+            int x = esp_random() % it.get_width();
+            int y = esp_random() % it.get_height();
+            it.draw_pixel_at(x, y, COLOR_ON);
+          }
+          break;
+      }
+
+# ---------------------------------------------------------------------------
+# Hardware: Button
+# ---------------------------------------------------------------------------
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO10
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Mode Button"
+    on_press:
+      - lambda: |-
+          id(display_mode) = (id(display_mode) % 3) + 1;
+
+  - platform: status
+    name: "Status"
+    entity_category: diagnostic
+
+# ---------------------------------------------------------------------------
+# Hardware: Weather sensor from Home Assistant
+# ---------------------------------------------------------------------------
+
+sensor:
+  - platform: homeassistant
+    entity_id: ${weather_entity}
+    id: outside_temperature
+    internal: true
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
+# ---------------------------------------------------------------------------
+# Auto-cycle display modes every 5s
+# ---------------------------------------------------------------------------
+
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          id(display_mode) = (id(display_mode) % 3) + 1;
+
+# ---------------------------------------------------------------------------
+# Diagnostic / management entities
+# ---------------------------------------------------------------------------
+
+button:
+  - platform: restart
+    name: "Restart"
+    entity_category: config
+  - platform: safe_mode
+    name: "Safe Mode"
+    entity_category: config
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: diagnostic
+  - platform: wifi_info
+    ip_address:
+      name: WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: WiFi MAC Address
+      entity_category: diagnostic
