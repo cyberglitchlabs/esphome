@@ -17,7 +17,7 @@ mqtt:
 # MQTT Command Subscription
 text_sensor:
   - platform: mqtt_subscribe
-    name: "${friendly_name} MQTT Command"
+    name: "MQTT Command"
     id: mqtt_scpi_command
     topic: ${mqtt_base_topic}/cmd
     internal: true
@@ -62,7 +62,7 @@ text_sensor:
             }
 
   - platform: mqtt_subscribe
-    name: "${friendly_name} MQTT Status"
+    name: "MQTT Status"
     id: mqtt_device_status
     topic: ${mqtt_base_topic}/status
     internal: true

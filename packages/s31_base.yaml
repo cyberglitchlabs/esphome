@@ -29,6 +29,9 @@ esp8266:
   early_pin_init: false
   restore_from_flash: false
 
+api:
+  reboot_timeout: 0s
+
 logger:
   baud_rate: 0 # (UART logging interferes with cse7766)
   logs:
@@ -162,6 +165,22 @@ button:
   - platform: safe_mode
     name: "Safe Mode"
     entity_category: config
+
+text_sensor:
+  - platform: version
+    name: 'ESPHome Version'
+    entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      name: WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: WiFi MAC Address
+      entity_category: diagnostic
 
 status_led:
   pin:

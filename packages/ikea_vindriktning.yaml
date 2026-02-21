@@ -32,6 +32,9 @@ time:
   - platform: homeassistant
     id: homeassistant_time
 
+api:
+  reboot_timeout: 0s
+
 # The PM1006 sensor uses UART to communicate.
 # Typical wiring for VINDRIKTNING is:
 # IKEA (Rest) -> ESP8266 RX (GPIO3/RX)
@@ -43,7 +46,7 @@ uart:
 sensor:
   - platform: pm1006
     pm_2_5:
-      name: "${friendly_name} PM 2.5"
+      name: "PM 2.5"
 #      filters:
 #        - sliding_window_moving_average:
 #            window_size: 10
@@ -51,24 +54,24 @@ sensor:
     update_interval: 20s
 
   - platform: uptime
-    name: "${friendly_name} Uptime"
+    name: "Uptime"
     entity_category: diagnostic
 
   - platform: wifi_signal
-    name: "${friendly_name} WiFi Signal"
+    name: "WiFi Signal"
     entity_category: diagnostic
     update_interval: 60s
 
 binary_sensor:
   - platform: status
-    name: "${friendly_name} Status"
+    name: "Status"
     entity_category: diagnostic
 
 button:
   - platform: restart
-    name: "${friendly_name} Restart"
+    name: "Restart"
     entity_category: config
 
   - platform: safe_mode
-    name: "${friendly_name} Safe Mode"
+    name: "Safe Mode"
     entity_category: config

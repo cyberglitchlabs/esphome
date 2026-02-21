@@ -1,3 +1,19 @@
+# Current Affairs Hardware Package
+# CT clamp current monitor using ADS1115 ADC modules over I2C.
+# Only J1 and J2 channels are currently wired.
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/current_affairs.yaml]
+#       ref: main
+
 substitutions:
   friendly_name: "Current Affairs"
   # The factor for the CT clamp (10A/1V)
@@ -20,6 +36,12 @@ esphome:
 
 esp8266:
   board: d1_mini
+
+api:
+  reboot_timeout: 0s
+
+logger:
+  level: INFO
 
 time:
   - platform: homeassistant
@@ -120,83 +142,101 @@ sensor:
     device_class: current
     state_class: measurement
     accuracy_decimals: 3
+
+  - platform: ct_clamp
+    sensor: ads48_2_3_raw
+    name: "Channel J2 Current"
+    id: j2_current
+    update_interval: ${update_interval}
+    sample_duration: ${sample_duration}
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    accuracy_decimals: 3
+
+  # Power Sensors (current × nominal RMS voltage)
+  - platform: template
+    name: "Channel J1 Power"
+    id: j1_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: ${update_interval}
+    lambda: |-
+      return id(j1_current).state * ${rms_voltage};
+
+  - platform: template
+    name: "Channel J2 Power"
+    id: j2_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: ${update_interval}
+    lambda: |-
+      return id(j2_current).state * ${rms_voltage};
+
+  # Daily Energy Sensors (kWh)
+  - platform: total_daily_energy
+    name: "Channel J1 Energy"
+    id: j1_energy
+    power_id: j1_power
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    accuracy_decimals: 3
     filters:
       - multiply: 0.001
 
+  - platform: total_daily_energy
+    name: "Channel J2 Energy"
+    id: j2_energy
+    power_id: j2_power
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  # Diagnostics
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
 binary_sensor:
   - platform: status
-    name: "${friendly_name} Status"
+    name: "Status"
     entity_category: diagnostic
 
 button:
   - platform: restart
-    name: "${friendly_name} Restart"
+    name: "Restart"
     entity_category: config
 
   - platform: safe_mode
-    name: "${friendly_name} Safe Mode"
+    name: "Safe Mode"
     entity_category: config
 
-  - platform: total_daily_energy
-    name: "Channel J2 Energy"
-    sensor: j2_power
-    id: j2_energy
-    unit_of_measurement: "kWh"
-    device_class: energy
-    state_class: total_increasing
-    filters:
-      - multiply: 0.001
-  - platform: total_daily_energy
-    name: "Channel J3 Energy"
-    sensor: j3_power
-    id: j3_energy
-    unit_of_measurement: "kWh"
-    device_class: energy
-    state_class: total_increasing
-    filters:
-      - multiply: 0.001
-  - platform: total_daily_energy
-    name: "Channel J4 Energy"
-    sensor: j4_power
-    id: j4_energy
-    unit_of_measurement: "kWh"
-    device_class: energy
-    state_class: total_increasing
-    filters:
-      - multiply: 0.001
-  - platform: total_daily_energy
-    name: "Channel J5 Energy"
-    sensor: j5_power
-    id: j5_energy
-    unit_of_measurement: "kWh"
-    device_class: energy
-    state_class: total_increasing
-    filters:
-      - multiply: 0.001
-  - platform: total_daily_energy
-    name: "Channel J6 Energy"
-    sensor: j6_power
-    id: j6_energy
-    unit_of_measurement: "kWh"
-    device_class: energy
-    state_class: total_increasing
-    filters:
-      - multiply: 0.001
-  - platform: total_daily_energy
-    name: "Channel J7 Energy"
-    sensor: j7_power
-    id: j7_energy
-    unit_of_measurement: "kWh"
-    device_class: energy
-    state_class: total_increasing
-    filters:
-      - multiply: 0.001
-  - platform: total_daily_energy
-    name: "Channel J8 Energy"
-    sensor: j8_power
-    id: j8_energy
-    unit_of_measurement: "kWh"
-    device_class: energy
-    state_class: total_increasing
-    filters:
-      - multiply: 0.001
+text_sensor:
+  - platform: version
+    name: 'ESPHome Version'
+    entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      name: WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: WiFi MAC Address
+      entity_category: diagnostic
