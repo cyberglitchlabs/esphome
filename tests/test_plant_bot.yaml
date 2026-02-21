@@ -1,0 +1,29 @@
+# CI validation wrapper for Plant-Bot package
+# Uses local !include (not remote URL) to test the in-repo version
+
+substitutions:
+  friendly_name: "Test Plant Bot"
+  pump_duration: "5s"
+  moisture_raw_min: "1800"
+  moisture_raw_max: "2700"
+  moisture_update_interval: "30s"
+
+esphome:
+  name: test-plant-bot
+  friendly_name: "${friendly_name}"
+
+packages:
+  device: !include ../packages/plant_bot_base.yaml
+
+wifi:
+  ssid: "test_ssid"
+  password: "test_password"
+  ap:
+    ssid: "Test Plant Bot Fallback"
+    password: ""
+
+api:
+
+ota:
+  - platform: esphome
+    password: "test_ota_password"

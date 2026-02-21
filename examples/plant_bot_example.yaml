@@ -1,0 +1,41 @@
+# Example configuration for Plant-Bot
+# Copy this into your ESPHome device configuration and customize
+
+substitutions:
+  friendly_name: "My Plant Bot"
+  # Duration the pump runs per watering cycle (e.g. 3s, 5s, 10s)
+  pump_duration: "5s"
+  # Calibrate these to your sensor — see docs/plant_bot.md
+  moisture_raw_min: "1800"  # raw ADC when probe is in water
+  moisture_raw_max: "2700"  # raw ADC when probe is in dry air
+  moisture_update_interval: "30s"
+
+esphome:
+  name: my-plant-bot
+  friendly_name: "${friendly_name}"
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/plant_bot_base.yaml]
+    ref: main
+    refresh: 1d
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  min_auth_mode: WPA2
+  ap:
+    ssid: "${friendly_name} Fallback"
+    password: ""
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+web_server:
+  port: 80

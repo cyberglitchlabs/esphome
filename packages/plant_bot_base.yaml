@@ -1,0 +1,180 @@
+# Plant-Bot Hardware Package
+# This package provides hardware-specific configuration only.
+# Users must define esphome, wifi, api, ota, and time in their device config.
+#
+# Hardware: ESP32-C3-MINI, SHT20 (I2C temp/humidity), capacitive soil
+#           moisture sensor, DRV8837C pump driver, WS2812B NeoPixel
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/plant_bot_base.yaml]
+#       ref: main
+
+substitutions:
+  friendly_name: "Plant Bot"
+  # Duration the pump runs per watering cycle
+  pump_duration: "5s"
+  # Moisture sensor raw ADC range — calibrate for your sensor/soil
+  # raw_min = sensor in water (100% wet), raw_max = sensor in dry air (0% wet)
+  moisture_raw_min: "1800"
+  moisture_raw_max: "2700"
+  # Moisture sensor update interval
+  moisture_update_interval: "30s"
+
+esphome:
+  project:
+    name: "cyberglitchlabs.plant_bot"
+    version: "1.0.0"
+  on_boot:
+    # Enable the capacitive oscillator power pin at startup
+    - output.turn_on: capstr_enable
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+api:
+  reboot_timeout: 0s
+
+logger:
+  baud_rate: 0
+
+i2c:
+  sda: GPIO19
+  scl: GPIO18
+  scan: true
+
+# Capacitive moisture oscillator enable — must be HIGH for valid readings
+output:
+  - platform: gpio
+    pin: GPIO2
+    id: capstr_enable
+
+# WS2812B NeoPixel — 1 LED on GPIO10
+light:
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2812
+    pin: GPIO10
+    num_leds: 1
+    name: "LED"
+    id: neo_led
+    default_transition_length: 0s
+
+# SHT20 temperature and humidity (I2C address 0x40)
+# ESPHome uses the htu21d platform for SHT20 — they share the same I2C protocol
+sensor:
+  - platform: htu21d
+    temperature:
+      name: "Temperature"
+      accuracy_decimals: 1
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+    humidity:
+      name: "Humidity"
+      accuracy_decimals: 1
+      device_class: humidity
+      state_class: measurement
+      unit_of_measurement: "%"
+    update_interval: 60s
+
+  - platform: adc
+    pin: GPIO4
+    name: "Soil Moisture"
+    id: soil_moisture
+    update_interval: ${moisture_update_interval}
+    accuracy_decimals: 1
+    device_class: moisture
+    state_class: measurement
+    unit_of_measurement: "%"
+    attenuation: 11db
+    raw: true
+    filters:
+      # Map raw ADC range to 0–100% (higher raw = drier)
+      - calibrate_linear:
+          - ${moisture_raw_max} -> 0.0
+          - ${moisture_raw_min} -> 100.0
+      - clamp:
+          min_value: 0.0
+          max_value: 100.0
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
+# Timed pump: in1=HIGH in2=LOW drives pump forward via DRV8837C
+# Script enforces max duration and prevents concurrent runs
+script:
+  - id: pump_timed_run
+    mode: single  # Ignore re-triggers while pump is already running
+    then:
+      - switch.turn_on: pump_in1
+      - switch.turn_off: pump_in2
+      - delay: ${pump_duration}
+      - switch.turn_off: pump_in1
+
+switch:
+  # DRV8837C control pins — kept internal, controlled via script only
+  - platform: gpio
+    pin: GPIO0
+    id: pump_in1
+    internal: true
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    pin: GPIO1
+    id: pump_in2
+    internal: true
+    restore_mode: ALWAYS_OFF
+
+button:
+  # Trigger a timed watering cycle from Home Assistant
+  - platform: template
+    name: "Water Now"
+    icon: mdi:water
+    on_press:
+      - script.execute: pump_timed_run
+
+  - platform: restart
+    name: "Restart"
+    entity_category: config
+
+  - platform: safe_mode
+    name: "Safe Mode"
+    entity_category: config
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      name: WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: WiFi MAC Address
+      entity_category: diagnostic
