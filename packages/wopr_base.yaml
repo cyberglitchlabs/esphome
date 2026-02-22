@@ -16,6 +16,7 @@
 #       ref: main
 
 substitutions:
+  name: "wopr"
   friendly_name: "WOPR Blinkenlights"
   max7219_clk_pin: GPIO4
   max7219_data_pin: GPIO6
@@ -25,6 +26,8 @@ substitutions:
   weather_entity: sensor.openweathermap_temperature
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: cyberglitchlabs.hackerbox_wopr
     version: "1.0.0"

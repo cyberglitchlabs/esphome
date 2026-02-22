@@ -23,6 +23,7 @@
 # - Physical button support
 
 substitutions:
+  name: "ifan04"
   friendly_name: "iFan04"
   # Fan startup boost time (optional override)
   fan_startup_boost_time: 5s
@@ -39,6 +40,8 @@ substitutions:
   code_long:       "T"    # -
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: "cyberglitchlabs.sonoff_ifan04"
     version: "1.0.0"

@@ -18,6 +18,7 @@
 #       ref: main
 
 substitutions:
+  name: "plant-bot"
   friendly_name: "Plant Bot"
   # Duration the pump runs per watering cycle
   pump_duration: "5s"
@@ -29,6 +30,8 @@ substitutions:
   moisture_update_interval: "30s"
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: "cyberglitchlabs.plant_bot"
     version: "1.0.0"

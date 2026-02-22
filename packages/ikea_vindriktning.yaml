@@ -15,9 +15,12 @@
 #       ref: main
 
 substitutions:
+  name: "ikea-vindriktning"
   friendly_name: "IKEA VINDRIKTNING"
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: "cyberglitchlabs.ikea_vindriktning"
     version: "1.0.0"

@@ -27,6 +27,8 @@
 #       ref: main
 
 substitutions:
+  name: "rv-tv"
+  friendly_name: "RV TV"
   tv_power_pin: GPIO26
   motor_up_pin: GPIO32
   motor_down_pin: GPIO33
@@ -37,6 +39,8 @@ substitutions:
   adc_update_interval: 50ms
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: cyberglitchlabs.rv_tv_lift
     version: "1.0"

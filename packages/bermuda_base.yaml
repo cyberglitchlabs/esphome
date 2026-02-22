@@ -19,12 +19,16 @@
 #       ref: main
 
 substitutions:
+  name: "bermuda"
+  friendly_name: "Bermuda"
   # BLE scan window (how long to listen per interval). Increase for more accuracy,
   # decrease if device becomes unstable. Must be <= scan_interval.
   ble_scan_interval: "320ms"
   ble_scan_window: "300ms"
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: "cyberglitchlabs.bermuda_proxy"
     version: "1.0.0"

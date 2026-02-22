@@ -21,11 +21,14 @@
 # - High sampling rate (RATE F) configuration
 
 substitutions:
+  name: "owon-xdm"
   friendly_name: "OWON XDM Remote"
   # Default command timeout in seconds
   command_timeout: "1.0"
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: "cyberglitchlabs.owon_xdm_remote"
     version: "1.0.0"
