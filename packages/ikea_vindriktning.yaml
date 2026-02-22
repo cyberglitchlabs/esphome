@@ -26,7 +26,7 @@ esphome:
     version: "1.0.0"
 
 esp8266:
-  board: esp01_1m
+  board: d1_mini
 
 logger:
   baud_rate: 0  # Disable UART logging to avoid conflicts with PM1006
@@ -38,9 +38,9 @@ time:
 api:
   reboot_timeout: 0s
 
-# The PM1006 sensor uses UART to communicate.
-# Typical wiring for VINDRIKTNING is:
-# IKEA (Rest) -> ESP8266 RX (GPIO3/RX)
+# The PM1006 sensor uses UART to communicate (one-way: ESP listens only).
+# Wemos D1 Mini wiring:
+#   IKEA REST pad -> D1 Mini D4 (GPIO2)
 uart:
   rx_pin: D4
   tx_pin: D2
