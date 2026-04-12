@@ -1,0 +1,42 @@
+# Example configuration for HackerBox #0125 Mochi Companion
+# Copy this into your ESPHome device configuration and customize.
+#
+# Hardware: ESP32-C3 Super Mini + 1.3in OLED + touch sensor + speaker
+# Product: https://www.instructables.com/HackerBox-0125-Vitality/
+
+substitutions:
+  friendly_name: "Mochi Companion"
+  # Update these to your Home Assistant entities:
+  weather_temp_entity: sensor.openweathermap_temperature
+  weather_condition_entity: weather.home
+  data_entity: sensor.outdoor_humidity
+  data_label: "Humidity"
+  data_unit: "%"
+  sun_entity: sun.sun
+
+esphome:
+  name: mochi
+  friendly_name: "${friendly_name}"
+
+packages:
+  device:
+    url: https://github.com/cyberglitchlabs/esphome
+    files: [packages/mochi_base.yaml]
+    ref: main
+    refresh: 1d
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  min_auth_mode: WPA2
+  ap:
+    ssid: "${friendly_name} Fallback"
+    password: ""
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password

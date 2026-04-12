@@ -1,0 +1,30 @@
+substitutions:
+  name: mochi-test
+  friendly_name: "Mochi Test"
+  wifi_ssid: test_ssid
+  wifi_password: test_password
+  weather_temp_entity: sensor.test_temperature
+  weather_condition_entity: weather.test_condition
+  data_entity: sensor.test_humidity
+  sun_entity: sun.sun
+
+esphome:
+  name: ${name}
+  friendly_name: "${friendly_name}"
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+
+api:
+
+ota:
+  - platform: esphome
+
+packages:
+  base: !include ../packages/mochi_base.yaml

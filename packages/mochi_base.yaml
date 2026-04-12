@@ -1,0 +1,345 @@
+# HackerBox #0125 Mochi Companion Hardware Package
+# This package provides hardware-specific configuration only.
+# Users must define esphome, wifi, api, and ota in their device config.
+#
+# Hardware: ESP32-C3 Super Mini, 1.3in OLED (I2C), touch sensor, speaker.
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/mochi_base.yaml]
+#       ref: main
+
+substitutions:
+  name: "mochi"
+  friendly_name: "Mochi Companion"
+  # Display wiring
+  i2c_sda_pin: GPIO20
+  i2c_scl_pin: GPIO21
+  oled_model: "SH1106 128x64"
+  # Hardware pins
+  touch_pin: GPIO1
+  speaker_pin: GPIO2
+  # Home Assistant data sources
+  weather_temp_entity: sensor.openweathermap_temperature
+  weather_condition_entity: weather.home
+  data_entity: sensor.outdoor_humidity
+  data_label: "Humidity"
+  data_unit: "%"
+  sun_entity: sun.sun
+  # Behavior tuning
+  data_view_timeout: "30s"
+  wake_animation_duration: "2s"
+  chirp_on_touch: "true"
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  project:
+    name: "cyberglitchlabs.hackerbox_mochi"
+    version: "1.0.0"
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+
+api:
+  reboot_timeout: 0s
+
+logger:
+  baud_rate: 0
+
+time:
+  - platform: homeassistant
+    id: home_time
+
+i2c:
+  sda: ${i2c_sda_pin}
+  scl: ${i2c_scl_pin}
+  scan: true
+
+output:
+  - platform: ledc
+    pin: ${speaker_pin}
+    id: speaker_output
+
+rtttl:
+  output: speaker_output
+
+globals:
+  - id: ui_mode
+    type: int
+    restore_value: no
+    initial_value: "0"
+  - id: face_frame
+    type: int
+    restore_value: no
+    initial_value: "0"
+  - id: sleep_anim_step
+    type: int
+    restore_value: no
+    initial_value: "0"
+  - id: next_blink_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+  - id: data_deadline_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+  - id: wake_deadline_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+
+font:
+  - file: "gfonts://Roboto"
+    id: font_small
+    size: 11
+  - file: "gfonts://Roboto"
+    id: font_medium
+    size: 14
+  - file: "gfonts://Press+Start+2P"
+    id: font_micro
+    size: 8
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: ${touch_pin}
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Touch"
+    filters:
+      - delayed_on: 20ms
+      - delayed_off: 20ms
+    on_press:
+      - if:
+          condition:
+            lambda: return std::string("${chirp_on_touch}") == "true";
+          then:
+            - rtttl.play: "tap:d=16,o=5,b=150:e6"
+      - lambda: |-
+          const uint32_t now = millis();
+          const bool night_mode = id(sun_state).has_state() && id(sun_state).state != "above_horizon";
+
+          if (night_mode) {
+            id(ui_mode) = 3;  // wake animation
+            id(wake_deadline_ms) = now + 2000;
+            id(data_deadline_ms) = now + 32000;
+          } else {
+            id(ui_mode) = 1;  // data page
+            id(data_deadline_ms) = now + 30000;
+          }
+
+  - platform: status
+    name: "Status"
+    entity_category: diagnostic
+
+sensor:
+  - platform: homeassistant
+    entity_id: ${weather_temp_entity}
+    id: weather_temp
+    internal: true
+
+  - platform: homeassistant
+    entity_id: ${data_entity}
+    id: extra_data
+    internal: true
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: homeassistant
+    entity_id: ${weather_condition_entity}
+    id: weather_condition
+    internal: true
+
+  - platform: homeassistant
+    entity_id: ${sun_entity}
+    id: sun_state
+    internal: true
+
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      name: WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: WiFi MAC Address
+      entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: "Restart"
+    entity_category: config
+
+  - platform: safe_mode
+    name: "Safe Mode"
+    entity_category: config
+
+light:
+  - platform: status_led
+    name: "Status LED"
+    pin:
+      number: GPIO8
+      inverted: true
+    restore_mode: ALWAYS_OFF
+
+interval:
+  - interval: 250ms
+    then:
+      - lambda: |-
+          const uint32_t now = millis();
+          const bool night_mode = id(sun_state).has_state() && id(sun_state).state != "above_horizon";
+
+          // Auto-transition between day/night idle faces.
+          if (id(ui_mode) == 0 && night_mode) {
+            id(ui_mode) = 2;
+            id(face_frame) = 0;
+          } else if (id(ui_mode) == 2 && !night_mode) {
+            id(ui_mode) = 0;
+            id(face_frame) = 0;
+          }
+
+          // Wake animation finishes before opening data page.
+          if (id(ui_mode) == 3 && now >= id(wake_deadline_ms)) {
+            id(ui_mode) = 1;
+          }
+
+          // Data page times out back to mode-appropriate face.
+          if (id(ui_mode) == 1 && now >= id(data_deadline_ms)) {
+            id(ui_mode) = night_mode ? 2 : 0;
+            id(face_frame) = 0;
+          }
+
+          // Animated blink in awake mode with randomized spacing.
+          if (id(ui_mode) == 0) {
+            if (id(next_blink_ms) == 0) {
+              id(next_blink_ms) = now + 1200 + (esp_random() % 3600);
+            }
+
+            if (now >= id(next_blink_ms)) {
+              if (id(face_frame) < 2) {
+                id(face_frame) += 1;
+              } else {
+                id(face_frame) = 0;
+                id(next_blink_ms) = now + 1200 + (esp_random() % 4600);
+              }
+            }
+          } else {
+            id(next_blink_ms) = 0;
+            if (id(ui_mode) != 2) {
+              id(face_frame) = 0;
+            }
+          }
+
+          // Lightweight sleep animation drift.
+          if (id(ui_mode) == 2) {
+            id(sleep_anim_step) = (id(sleep_anim_step) + 1) % 8;
+          } else {
+            id(sleep_anim_step) = 0;
+          }
+
+display:
+  - platform: ssd1306_i2c
+    id: mochi_display
+    model: ${oled_model}
+    address: 0x3C
+    update_interval: 250ms
+    lambda: |-
+      // ui_mode: 0=awake face, 1=data page, 2=sleep face, 3=wake animation
+      const int mode = id(ui_mode);
+
+      if (mode == 1) {
+        if (id(home_time).now().is_valid()) {
+          it.strftime(0, 0, id(font_micro), "%a %H:%M", id(home_time).now());
+        } else {
+          it.print(0, 0, id(font_micro), "Time syncing...");
+        }
+
+        if (id(weather_temp).has_state()) {
+          it.printf(0, 14, id(font_small), "Temp: %.1f C", id(weather_temp).state);
+        } else {
+          it.print(0, 14, id(font_small), "Temp: --");
+        }
+
+        if (id(weather_condition).has_state()) {
+          it.printf(0, 30, id(font_small), "Wx: %s", id(weather_condition).state.c_str());
+        } else {
+          it.print(0, 30, id(font_small), "Wx: --");
+        }
+
+        if (id(extra_data).has_state()) {
+          it.printf(0, 46, id(font_small), "${data_label}: %.0f${data_unit}", id(extra_data).state);
+        } else {
+          it.printf(0, 46, id(font_small), "${data_label}: --${data_unit}");
+        }
+
+        it.print(0, 58, id(font_micro), "touch to refresh");
+        return;
+      }
+
+      if (mode == 3) {
+        // Wake-up animation with an "angry" expression.
+        it.filled_circle(64, 32, 30);
+        it.filled_circle(64, 32, 28, COLOR_OFF);
+        it.line(40, 25, 54, 20);
+        it.line(88, 25, 74, 20);
+        it.line(46, 34, 56, 34);
+        it.line(72, 34, 82, 34);
+        it.filled_rectangle(57, 45, 14, 2);
+        it.print(45, 52, id(font_micro), "WAKE");
+        return;
+      }
+
+      // Shared face outline for awake/sleep.
+      it.filled_circle(64, 32, 30);
+      it.filled_circle(64, 32, 28, COLOR_OFF);
+
+      if (mode == 2) {
+        // Sleep face: closed eyes with drifting Zs.
+        it.line(46, 30, 56, 30);
+        it.line(72, 30, 82, 30);
+        it.line(56, 45, 72, 45);
+
+        const int z_shift = id(sleep_anim_step) / 2;
+        it.printf(90 + z_shift, 12 - z_shift, id(font_micro), "Z");
+        it.printf(100 + z_shift, 6 - z_shift, id(font_micro), "z");
+        return;
+      }
+
+      // Awake face with randomized 3-frame blink.
+      if (id(face_frame) == 0) {
+        it.filled_circle(51, 30, 4);
+        it.filled_circle(77, 30, 4);
+      } else if (id(face_frame) == 1) {
+        it.filled_rectangle(47, 30, 8, 2);
+        it.filled_rectangle(73, 30, 8, 2);
+      } else {
+        it.line(47, 30, 55, 30);
+        it.line(73, 30, 81, 30);
+      }
+
+      it.filled_rectangle(56, 44, 16, 2);
