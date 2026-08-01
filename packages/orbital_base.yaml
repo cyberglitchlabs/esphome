@@ -46,6 +46,13 @@ substitutions:
   # Auto-cycle timing (only used while auto-cycle is toggled on via long-press OK)
   orbital_autocycle_interval: 30s
 
+  # Weather set — point these at any HA weather-related entities you have
+  orbital_weather_temp_entity: sensor.outdoor_temperature
+  orbital_weather_humidity_entity: sensor.outdoor_humidity
+  orbital_weather_condition_entity: weather.home
+  orbital_weather_wind_entity: sensor.outdoor_wind_speed
+  orbital_weather_forecast_entity: sensor.weather_forecast_summary
+
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
@@ -379,7 +386,51 @@ button:
     name: "Safe Mode"
     entity_category: config
 
+# ---------------------------------------------------------------------------
+# Home Assistant data: Weather set
+# ---------------------------------------------------------------------------
+
 text_sensor:
+  - platform: homeassistant
+    id: weather_temp_ts
+    entity_id: ${orbital_weather_temp_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_1
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: weather_humidity_ts
+    entity_id: ${orbital_weather_humidity_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_2
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: weather_condition_ts
+    entity_id: ${orbital_weather_condition_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_3
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: weather_wind_ts
+    entity_id: ${orbital_weather_wind_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_4
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: weather_forecast_ts
+    entity_id: ${orbital_weather_forecast_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_5
+          text: !lambda "return x;"
   - platform: version
     name: "ESPHome Version"
     entity_category: diagnostic
