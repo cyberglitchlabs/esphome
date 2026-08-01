@@ -63,6 +63,14 @@ substitutions:
   orbital_person4_entity: person.person_4
   orbital_person5_entity: person.person_5
 
+  # Custom set — point these at absolutely anything HA already tracks
+  # (energy, stocks, whatever). The device just displays the entity's state.
+  orbital_custom1_entity: sensor.custom_1
+  orbital_custom2_entity: sensor.custom_2
+  orbital_custom3_entity: sensor.custom_3
+  orbital_custom4_entity: sensor.custom_4
+  orbital_custom5_entity: sensor.custom_5
+
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
@@ -480,6 +488,46 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: presence_label_5
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: custom_sensor1_ts
+    entity_id: ${orbital_custom1_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: custom_label_1
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: custom_sensor2_ts
+    entity_id: ${orbital_custom2_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: custom_label_2
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: custom_sensor3_ts
+    entity_id: ${orbital_custom3_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: custom_label_3
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: custom_sensor4_ts
+    entity_id: ${orbital_custom4_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: custom_label_4
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: custom_sensor5_ts
+    entity_id: ${orbital_custom5_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: custom_label_5
           text: !lambda "return x;"
   - platform: version
     name: "ESPHome Version"
