@@ -1,0 +1,116 @@
+# HackerBox #0129 Orbital Hardware Package
+# This package provides hardware-specific configuration for the Orbital
+# ESP32-S3 SuperMini device driving five round 1.28" GC9A01A displays
+# (240x240 each) via LVGL, three navigation buttons, and an onboard
+# addressable RGB status LED. Pinout confirmed from the HackerBox 0129
+# Instructables guide (Step 5) — differs from the upstream info-orbs
+# project, which targets a plain ESP32.
+#
+# Required in your device yaml:
+#   esphome:
+#     name: your-device-name
+#     friendly_name: "Your Device Name"
+#
+# Usage:
+#   packages:
+#     device:
+#       url: https://github.com/cyberglitchlabs/esphome
+#       files: [packages/orbital_base.yaml]
+#       ref: main
+
+substitutions:
+  name: "orbital"
+  friendly_name: "Orbital"
+
+  # SPI bus (shared by all five displays)
+  orbital_mosi_pin: GPIO11
+  orbital_sclk_pin: GPIO12
+  orbital_dc_pin: GPIO9
+  orbital_reset_pin: GPIO13
+
+  # Per-display chip-select pins
+  orbital_cs1_pin: GPIO4
+  orbital_cs2_pin: GPIO5
+  orbital_cs3_pin: GPIO6
+  orbital_cs4_pin: GPIO7
+  orbital_cs5_pin: GPIO8
+
+  # Buttons
+  orbital_button_left_pin: GPIO2
+  orbital_button_ok_pin: GPIO1
+  orbital_button_right_pin: GPIO3
+
+  # Onboard addressable RGB LED
+  orbital_led_pin: GPIO48
+
+  # Auto-cycle timing (only used while auto-cycle is toggled on via long-press OK)
+  orbital_autocycle_interval: 30s
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  project:
+    name: cyberglitchlabs.hackerbox_orbital
+    version: "1.0.0"
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+api:
+  reboot_timeout: 0s
+
+logger:
+
+time:
+  - platform: homeassistant
+    id: orbital_time
+
+web_server:
+  port: 80
+
+# ---------------------------------------------------------------------------
+# Diagnostic / management entities
+# ---------------------------------------------------------------------------
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+    entity_category: diagnostic
+
+sensor:
+  - platform: wifi_signal
+    id: wifi_signal_sensor
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+  - platform: uptime
+    id: uptime_sensor
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: "Restart"
+    entity_category: config
+  - platform: safe_mode
+    name: "Safe Mode"
+    entity_category: config
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: diagnostic
+  - platform: wifi_info
+    ip_address:
+      name: WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: WiFi MAC Address
+      entity_category: diagnostic
