@@ -53,6 +53,16 @@ substitutions:
   orbital_weather_wind_entity: sensor.outdoor_wind_speed
   orbital_weather_forecast_entity: sensor.weather_forecast_summary
 
+  # Presence set — point these at your HA person.* entities.
+  # Note: this repo's bermuda_base.yaml package is a bare BLE proxy with no
+  # person entities of its own; if you use Bermuda for presence, point these
+  # at whatever entities the Bermuda HA integration created for you.
+  orbital_person1_entity: person.person_1
+  orbital_person2_entity: person.person_2
+  orbital_person3_entity: person.person_3
+  orbital_person4_entity: person.person_4
+  orbital_person5_entity: person.person_5
+
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
@@ -430,6 +440,46 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: weather_label_5
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: presence_person1_ts
+    entity_id: ${orbital_person1_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: presence_label_1
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: presence_person2_ts
+    entity_id: ${orbital_person2_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: presence_label_2
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: presence_person3_ts
+    entity_id: ${orbital_person3_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: presence_label_3
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: presence_person4_ts
+    entity_id: ${orbital_person4_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: presence_label_4
+          text: !lambda "return x;"
+  - platform: homeassistant
+    id: presence_person5_ts
+    entity_id: ${orbital_person5_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: presence_label_5
           text: !lambda "return x;"
   - platform: version
     name: "ESPHome Version"
