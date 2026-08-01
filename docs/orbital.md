@@ -72,8 +72,8 @@ what HA already gives it.
 
 | Button | Action |
 |---|---|
-| Left | Previous set (wraps Custom → Clock) |
-| Right | Next set (wraps Clock → Weather → Presence → Custom) |
+| Left | Previous set (wraps Clock → Custom) |
+| Right | Next set (wraps Clock → Weather → Presence → Custom → Clock) |
 | OK (short press, 50–500ms) | Force a redraw of the current set |
 | OK (long press, 500ms–5s) | Toggle auto-cycle on/off |
 
@@ -131,6 +131,8 @@ esphome run examples/orbital_example.yaml
 
 | Key | Default | Description |
 |---|---|---|
+| `name` | `orbital` | Device name |
+| `friendly_name` | `Orbital` | Device friendly name |
 | `orbital_mosi_pin` | GPIO11 | SPI MOSI |
 | `orbital_sclk_pin` | GPIO12 | SPI SCLK |
 | `orbital_dc_pin` | GPIO9 | Shared DC pin |

@@ -77,6 +77,13 @@ esphome:
   project:
     name: cyberglitchlabs.hackerbox_orbital
     version: "1.0.0"
+  on_boot:
+    then:
+      - light.turn_on:
+          id: status_light
+          red: 100%
+          green: 0%
+          blue: 0%
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -93,11 +100,15 @@ api:
         green: 100%
         blue: 0%
   on_client_disconnected:
-    - light.turn_on:
-        id: status_light
-        red: 100%
-        green: 80%
-        blue: 0%
+    - if:
+        condition:
+          wifi.connected:
+        then:
+          - light.turn_on:
+              id: status_light
+              red: 100%
+              green: 80%
+              blue: 0%
 
 wifi:
   on_connect:
@@ -222,6 +233,7 @@ lvgl:
     displays:
       - display_1
     buffer_size: 10%
+    default_font: montserrat_28
     pages:
       - id: clock_1
         widgets:
@@ -234,24 +246,25 @@ lvgl:
           - label:
               id: weather_label_1
               align: CENTER
-              text: "—"
+              text: "-"
       - id: presence_1
         widgets:
           - label:
               id: presence_label_1
               align: CENTER
-              text: "—"
+              text: "-"
       - id: custom_1
         widgets:
           - label:
               id: custom_label_1
               align: CENTER
-              text: "—"
+              text: "-"
 
   - id: lvgl_2
     displays:
       - display_2
     buffer_size: 10%
+    default_font: montserrat_28
     pages:
       - id: clock_2
         widgets:
@@ -264,24 +277,25 @@ lvgl:
           - label:
               id: weather_label_2
               align: CENTER
-              text: "—"
+              text: "-"
       - id: presence_2
         widgets:
           - label:
               id: presence_label_2
               align: CENTER
-              text: "—"
+              text: "-"
       - id: custom_2
         widgets:
           - label:
               id: custom_label_2
               align: CENTER
-              text: "—"
+              text: "-"
 
   - id: lvgl_3
     displays:
       - display_3
     buffer_size: 10%
+    default_font: montserrat_28
     pages:
       - id: clock_3
         widgets:
@@ -294,82 +308,85 @@ lvgl:
           - label:
               id: weather_label_3
               align: CENTER
-              text: "—"
+              text: "-"
       - id: presence_3
         widgets:
           - label:
               id: presence_label_3
               align: CENTER
-              text: "—"
+              text: "-"
       - id: custom_3
         widgets:
           - label:
               id: custom_label_3
               align: CENTER
-              text: "—"
+              text: "-"
 
   - id: lvgl_4
     displays:
       - display_4
     buffer_size: 10%
+    default_font: montserrat_28
     pages:
       - id: clock_4
         widgets:
           - label:
               id: clock_uptime_4
               align: CENTER
-              text: "0s"
+              text: "0 s"
       - id: weather_4
         widgets:
           - label:
               id: weather_label_4
               align: CENTER
-              text: "—"
+              text: "-"
       - id: presence_4
         widgets:
           - label:
               id: presence_label_4
               align: CENTER
-              text: "—"
+              text: "-"
       - id: custom_4
         widgets:
           - label:
               id: custom_label_4
               align: CENTER
-              text: "—"
+              text: "-"
 
   - id: lvgl_5
     displays:
       - display_5
     buffer_size: 10%
+    default_font: montserrat_28
     pages:
       - id: clock_5
         widgets:
           - label:
               id: clock_wifi_5
               align: CENTER
-              text: "0 dB"
+              text: "0 dBm"
       - id: weather_5
         widgets:
           - label:
               id: weather_label_5
               align: CENTER
-              text: "—"
+              text: "-"
       - id: presence_5
         widgets:
           - label:
               id: presence_label_5
               align: CENTER
-              text: "—"
+              text: "-"
       - id: custom_5
         widgets:
           - label:
               id: custom_label_5
               align: CENTER
-              text: "—"
+              text: "-"
 
 # ---------------------------------------------------------------------------
-# Interval: drive Clock page labels from time
+# Interval: drive Clock page labels from time, plus the Task 8 auto-cycle
+# timer that advances the active set while auto-cycle is toggled on
 # ---------------------------------------------------------------------------
 
 interval:
@@ -403,7 +420,8 @@ interval:
             - script.execute: show_current_set
 
 # ---------------------------------------------------------------------------
-# Diagnostic / management entities
+# Diagnostic / management entities, plus the hardware navigation buttons
+# (button_left/button_right/button_ok) that drive set switching and auto-cycle
 # ---------------------------------------------------------------------------
 
 binary_sensor:
@@ -466,7 +484,7 @@ sensor:
       - lvgl.label.update:
           id: clock_wifi_5
           text:
-            format: "%.0f dB"
+            format: "%.0f dBm"
             args: [x]
   - platform: uptime
     id: uptime_sensor
@@ -489,7 +507,7 @@ button:
     entity_category: config
 
 # ---------------------------------------------------------------------------
-# Home Assistant data: Weather set
+# Home Assistant data: Weather / Presence / Custom sets
 # ---------------------------------------------------------------------------
 
 text_sensor:
