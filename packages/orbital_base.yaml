@@ -68,6 +68,12 @@ time:
   - platform: homeassistant
     id: orbital_time
 
+globals:
+  - id: current_set
+    type: int
+    restore_value: false
+    initial_value: "0"
+
 web_server:
   port: 80
 
@@ -93,7 +99,7 @@ display:
       number: ${orbital_reset_pin}
       allow_other_uses: true
     invert_colors: true
-    auto_clear_enabled: true
+    auto_clear_enabled: false
     update_interval: never  # LVGL drives redraws; no polling needed
   - platform: ili9xxx
     model: GC9A01A
@@ -107,7 +113,7 @@ display:
       number: ${orbital_reset_pin}
       allow_other_uses: true
     invert_colors: true
-    auto_clear_enabled: true
+    auto_clear_enabled: false
     update_interval: never
   - platform: ili9xxx
     model: GC9A01A
@@ -121,7 +127,7 @@ display:
       number: ${orbital_reset_pin}
       allow_other_uses: true
     invert_colors: true
-    auto_clear_enabled: true
+    auto_clear_enabled: false
     update_interval: never
   - platform: ili9xxx
     model: GC9A01A
@@ -135,7 +141,7 @@ display:
       number: ${orbital_reset_pin}
       allow_other_uses: true
     invert_colors: true
-    auto_clear_enabled: true
+    auto_clear_enabled: false
     update_interval: never
   - platform: ili9xxx
     model: GC9A01A
@@ -149,8 +155,188 @@ display:
       number: ${orbital_reset_pin}
       allow_other_uses: true
     invert_colors: true
-    auto_clear_enabled: true
+    auto_clear_enabled: false
     update_interval: never
+
+# ---------------------------------------------------------------------------
+# LVGL: one instance per display, four pages each (Clock/Weather/Presence/Custom)
+# ---------------------------------------------------------------------------
+
+lvgl:
+  - id: lvgl_1
+    displays:
+      - display_1
+    buffer_size: 10%
+    pages:
+      - id: clock_1
+        widgets:
+          - label:
+              id: clock_time_1
+              align: CENTER
+              text: "00:00:00"
+      - id: weather_1
+        widgets:
+          - label:
+              id: weather_label_1
+              align: CENTER
+              text: "—"
+      - id: presence_1
+        widgets:
+          - label:
+              id: presence_label_1
+              align: CENTER
+              text: "—"
+      - id: custom_1
+        widgets:
+          - label:
+              id: custom_label_1
+              align: CENTER
+              text: "—"
+
+  - id: lvgl_2
+    displays:
+      - display_2
+    buffer_size: 10%
+    pages:
+      - id: clock_2
+        widgets:
+          - label:
+              id: clock_date_2
+              align: CENTER
+              text: "0000-00-00"
+      - id: weather_2
+        widgets:
+          - label:
+              id: weather_label_2
+              align: CENTER
+              text: "—"
+      - id: presence_2
+        widgets:
+          - label:
+              id: presence_label_2
+              align: CENTER
+              text: "—"
+      - id: custom_2
+        widgets:
+          - label:
+              id: custom_label_2
+              align: CENTER
+              text: "—"
+
+  - id: lvgl_3
+    displays:
+      - display_3
+    buffer_size: 10%
+    pages:
+      - id: clock_3
+        widgets:
+          - label:
+              id: clock_day_3
+              align: CENTER
+              text: "-"
+      - id: weather_3
+        widgets:
+          - label:
+              id: weather_label_3
+              align: CENTER
+              text: "—"
+      - id: presence_3
+        widgets:
+          - label:
+              id: presence_label_3
+              align: CENTER
+              text: "—"
+      - id: custom_3
+        widgets:
+          - label:
+              id: custom_label_3
+              align: CENTER
+              text: "—"
+
+  - id: lvgl_4
+    displays:
+      - display_4
+    buffer_size: 10%
+    pages:
+      - id: clock_4
+        widgets:
+          - label:
+              id: clock_uptime_4
+              align: CENTER
+              text: "0s"
+      - id: weather_4
+        widgets:
+          - label:
+              id: weather_label_4
+              align: CENTER
+              text: "—"
+      - id: presence_4
+        widgets:
+          - label:
+              id: presence_label_4
+              align: CENTER
+              text: "—"
+      - id: custom_4
+        widgets:
+          - label:
+              id: custom_label_4
+              align: CENTER
+              text: "—"
+
+  - id: lvgl_5
+    displays:
+      - display_5
+    buffer_size: 10%
+    pages:
+      - id: clock_5
+        widgets:
+          - label:
+              id: clock_wifi_5
+              align: CENTER
+              text: "0 dB"
+      - id: weather_5
+        widgets:
+          - label:
+              id: weather_label_5
+              align: CENTER
+              text: "—"
+      - id: presence_5
+        widgets:
+          - label:
+              id: presence_label_5
+              align: CENTER
+              text: "—"
+      - id: custom_5
+        widgets:
+          - label:
+              id: custom_label_5
+              align: CENTER
+              text: "—"
+
+# ---------------------------------------------------------------------------
+# Interval: drive Clock page labels from time
+# ---------------------------------------------------------------------------
+
+interval:
+  - interval: 1s
+    then:
+      - lvgl.label.update:
+          id: clock_time_1
+          text:
+            time_format: "%H:%M:%S"
+            time: orbital_time
+  - interval: 60s
+    then:
+      - lvgl.label.update:
+          id: clock_date_2
+          text:
+            time_format: "%Y-%m-%d"
+            time: orbital_time
+      - lvgl.label.update:
+          id: clock_day_3
+          text:
+            time_format: "%A"
+            time: orbital_time
 
 # ---------------------------------------------------------------------------
 # Diagnostic / management entities
@@ -167,11 +353,23 @@ sensor:
     name: "WiFi Signal"
     update_interval: 60s
     entity_category: diagnostic
+    on_value:
+      - lvgl.label.update:
+          id: clock_wifi_5
+          text:
+            format: "%.0f dB"
+            args: [x]
   - platform: uptime
     id: uptime_sensor
     name: "Uptime"
     update_interval: 60s
     entity_category: diagnostic
+    on_value:
+      - lvgl.label.update:
+          id: clock_uptime_4
+          text:
+            format: "%.0f s"
+            args: [x]
 
 button:
   - platform: restart
