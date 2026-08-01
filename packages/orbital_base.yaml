@@ -72,6 +72,87 @@ web_server:
   port: 80
 
 # ---------------------------------------------------------------------------
+# Hardware: Displays (5x round GC9A01A, shared SPI bus)
+# ---------------------------------------------------------------------------
+
+spi:
+  id: spi_bus
+  clk_pin: ${orbital_sclk_pin}
+  mosi_pin: ${orbital_mosi_pin}
+
+display:
+  - platform: ili9xxx
+    model: GC9A01A
+    id: display_1
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs1_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    reset_pin:
+      number: ${orbital_reset_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: true
+    update_interval: never  # LVGL drives redraws; no polling needed
+  - platform: ili9xxx
+    model: GC9A01A
+    id: display_2
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs2_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    reset_pin:
+      number: ${orbital_reset_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: true
+    update_interval: never
+  - platform: ili9xxx
+    model: GC9A01A
+    id: display_3
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs3_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    reset_pin:
+      number: ${orbital_reset_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: true
+    update_interval: never
+  - platform: ili9xxx
+    model: GC9A01A
+    id: display_4
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs4_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    reset_pin:
+      number: ${orbital_reset_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: true
+    update_interval: never
+  - platform: ili9xxx
+    model: GC9A01A
+    id: display_5
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs5_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    reset_pin:
+      number: ${orbital_reset_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: true
+    update_interval: never
+
+# ---------------------------------------------------------------------------
 # Diagnostic / management entities
 # ---------------------------------------------------------------------------
 
