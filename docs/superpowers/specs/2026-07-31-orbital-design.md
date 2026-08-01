@@ -6,7 +6,7 @@ Add a new ESPHome package (`packages/orbital_base.yaml`) for the HackerBox #0129
 "Orbital" kit: an ESP32-S3 SuperMini driving five round 1.28" GC9A01A SPI displays
 (240×240 each) plus three navigation buttons and an onboard addressable RGB LED.
 The package renders four cyclable "sets" of Home Assistant data across all five
-screens simultaneously, using only first-party ESPHome components (`mipi_spi`,
+screens simultaneously, using only first-party ESPHome components (`ili9xxx`,
 `lvgl`, `light`, `homeassistant` sensors) — no `external_components:`, no custom
 C++ libraries, no direct third-party API calls from firmware.
 
@@ -44,17 +44,26 @@ Instructables guide (not board silkscreen) and should be double-checked against
 the physical unit before flashing.
 
 **Known constraint:** the ESP32-S3 SuperMini typically ships without PSRAM. LVGL
-does not strictly require it, but full-resolution buffers for five 240×240
-displays would exceed available SRAM. The package will set LVGL `buffer_size`
-conservatively (well under the ~20KB/display ESPHome falls back to without
-PSRAM) and keep widgets simple (labels, arcs — no heavy animation) to stay within
-budget. If a user's board does have PSRAM, they can raise `buffer_size` via
+does not strictly require it, but a 100% buffer for a single 240×240 RGB565
+display is 115,200 bytes, and five of those held at once would exceed
+available SRAM by itself, before accounting for WiFi stack and application
+code. LVGL's `buffer_size` is expressed as a percentage of display size, and
+ESPHome falls back to a smaller allocation automatically if a full buffer
+can't be allocated — but relying on the automatic fallback across five
+simultaneous LVGL instances is a real risk, so the package sets
+`buffer_size: 10%` explicitly on each of the five `lvgl:` blocks (~11.5KB each,
+~57.6KB combined) and keeps widgets simple (labels, arcs — no heavy animation)
+to stay within budget. This value is a starting point, not a guarantee — Task
+3 in the implementation plan calls out watching for boot-time allocation
+failures and lowering it further if needed. If a user's board does have
+PSRAM, they can raise `buffer_size` via
 substitution.
 
 ## Architecture
 
-- One shared `spi:` bus (MOSI/SCLK), five `display: platform: mipi_spi` entries
-  (model `GC9A01A`, 240×240), differing only by `cs_pin`, sharing `dc_pin`/`reset_pin`.
+- One shared `spi:` bus (MOSI/SCLK), five `display: platform: ili9xxx` entries
+  (model `GC9A01A`, first-class named model — no manual init sequence needed),
+  differing only by `cs_pin`, sharing `dc_pin`/`reset_pin`.
 - Five `lvgl:` blocks, one per display (`displays: [display_N]`), each defining
   the same four `pages:` (one page per "set" below) so all five screens change
   together.
