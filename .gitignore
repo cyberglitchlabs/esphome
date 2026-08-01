@@ -6,5 +6,6 @@
 /secrets.yaml
 /devices/
 .agents
+.claude
 opencode.json
 skills-lock.json

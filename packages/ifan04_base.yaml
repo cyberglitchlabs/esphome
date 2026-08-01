@@ -59,9 +59,13 @@ external_components:
   - source:
       type: git
       url: https://github.com/rh1rich/esphome-ifan-remote
+      ref: main
+    refresh: 7d
   - source:
       type: git
       url: https://github.com/rh1rich/esphome-morse-code
+      ref: main
+    refresh: 7d
 
 esp8266:
   board: esp8285

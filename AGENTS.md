@@ -40,6 +40,13 @@ esphome compile tests/test_s31.yaml
 esphome config tests/test_s31.yaml
 esphome config tests/test_ifan04.yaml
 esphome config tests/test_owon_xdm.yaml
+esphome config tests/test_wopr.yaml
+esphome config tests/test_rv_tv.yaml
+esphome config tests/test_plant_bot.yaml
+esphome config tests/test_bermuda.yaml
+esphome config tests/test_mochi.yaml
+esphome config tests/test_current_affairs.yaml
+esphome config tests/test_ikea_vindriktning.yaml
 ```
 
 CI runs `esphome config <file>` for each file in the matrix defined in

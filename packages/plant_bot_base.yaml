@@ -42,7 +42,7 @@ esphome:
 esp32:
   board: esp32-c3-devkitm-1
   framework:
-    type: arduino
+    type: esp-idf
 
 api:
   reboot_timeout: 0s
@@ -61,11 +61,11 @@ output:
     pin: GPIO2
     id: capstr_enable
 
-# WS2812B NeoPixel — 1 LED on GPIO10
+# WS2812B NeoPixel — 1 LED on GPIO10 (RMT-driven, esp-idf native)
 light:
-  - platform: neopixelbus
-    type: GRB
-    variant: WS2812
+  - platform: esp32_rmt_led_strip
+    rgb_order: GRB
+    chipset: WS2812
     pin: GPIO10
     num_leds: 1
     name: "LED"
@@ -99,7 +99,7 @@ sensor:
     device_class: moisture
     state_class: measurement
     unit_of_measurement: "%"
-    attenuation: 11db
+    attenuation: 12db
     raw: true
     filters:
       # Map raw ADC range to 0–100% (higher raw = drier)
