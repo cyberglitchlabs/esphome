@@ -26,6 +26,7 @@ jobs:
           - tests/test_mochi.yaml
           - tests/test_current_affairs.yaml
           - tests/test_ikea_vindriktning.yaml
+          - tests/test_orbital.yaml
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4

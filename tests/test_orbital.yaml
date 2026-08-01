@@ -1,0 +1,29 @@
+substitutions:
+  name: orbital-test
+  friendly_name: "Orbital Test"
+  wifi_ssid: test_ssid
+  wifi_password: test_password
+  orbital_weather_temp_entity: sensor.test_temperature
+  orbital_person1_entity: person.test_person
+
+esphome:
+  name: ${name}
+  friendly_name: "${friendly_name}"
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+
+api:
+
+ota:
+  - platform: esphome
+
+packages:
+  base: !include ../packages/orbital_base.yaml
