@@ -88,15 +88,22 @@ whatever entity state HA gives it.
 - **Clock** uses local `time: homeassistant` (no substitution needed) plus the
   device's own uptime/WiFi-signal sensors — same pattern as the diagnostic block
   used across every package in this repo.
-- **Weather** substitutions default to a generic `weather.home` style entity;
-  documented as overridable to any HA weather integration.
-- **Presence** substitutions default to entity IDs matching this repo's
-  `bermuda_base.yaml` package's naming convention, so the two packages compose
-  naturally if a user runs both, but Presence works with any `person.*` or
-  `binary_sensor.*` entity.
-- **Custom** substitutions are generic (`custom_sensor_1_entity` .. `_5`),
-  letting a user point them at anything HA already tracks (energy, stocks,
-  whatever) without the package needing to know what it is.
+- **Weather** substitutions default to `weather.home` (HA's default weather
+  entity ID) for condition/forecast, and `sensor.outdoor_temperature` /
+  `sensor.outdoor_humidity` style placeholders for temp/humidity/wind;
+  documented as overridable to any HA weather integration's actual entity IDs.
+- **Presence** substitutions default to generic placeholders
+  `person.person_1` .. `person.person_5`. Note: `bermuda_base.yaml` is a bare
+  BLE proxy — it doesn't expose person/presence entities itself, it only feeds
+  data to the Bermuda HA integration, which creates its own device_tracker/
+  distance entities under names Bermuda controls, not this repo. So there's no
+  fixed naming convention to default to; the docs will note that if a user runs
+  Bermuda, they should point these substitutions at whatever entity IDs the
+  Bermuda integration actually created in their HA instance.
+- **Custom** substitutions default to generic placeholders
+  `sensor.custom_1` .. `sensor.custom_5`, letting a user point them at anything
+  HA already tracks (energy, stocks, whatever) without the package needing to
+  know what it is.
 
 ## Navigation
 
