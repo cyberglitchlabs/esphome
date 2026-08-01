@@ -98,6 +98,10 @@ globals:
     type: int
     restore_value: false
     initial_value: "0"
+  - id: autocycle_enabled
+    type: bool
+    restore_value: false
+    initial_value: "false"
 
 web_server:
   port: 80
@@ -362,6 +366,15 @@ interval:
           text:
             time_format: "%A"
             time: orbital_time
+  - interval: ${orbital_autocycle_interval}
+    then:
+      - if:
+          condition:
+            lambda: "return id(autocycle_enabled);"
+          then:
+            - lambda: |-
+                id(current_set) = (id(current_set) + 1) % 4;
+            - script.execute: show_current_set
 
 # ---------------------------------------------------------------------------
 # Diagnostic / management entities
@@ -399,6 +412,23 @@ binary_sensor:
         - lambda: |-
             id(current_set) = (id(current_set) + 1) % 4;
         - script.execute: show_current_set
+  - platform: gpio
+    id: button_ok
+    pin:
+      number: ${orbital_button_ok_pin}
+      mode: INPUT_PULLUP
+      inverted: true
+    internal: true
+    on_click:
+      - min_length: 50ms
+        max_length: 500ms
+        then:
+          - script.execute: show_current_set
+      - min_length: 500ms
+        max_length: 5000ms
+        then:
+          - lambda: |-
+              id(autocycle_enabled) = !id(autocycle_enabled);
 
 sensor:
   - platform: wifi_signal
