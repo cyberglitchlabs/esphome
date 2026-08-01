@@ -46,6 +46,7 @@ packages:
 | **ANAVI Fume Extractor** | [Docs](docs/anavi_fume_extractor.md) | `packages/anavi_fume_extractor.yaml` |
 | **Current Affairs** | [Docs](docs/current_affairs.md) | `packages/current_affairs.yaml` |
 | **IKEA VINDRIKTNING** | [Docs](docs/ikea_vindriktning.md) | `packages/ikea_vindriktning.yaml` |
+| **HackerBox 0129 Orbital** | [Docs](docs/orbital.md) | `packages/orbital_base.yaml` |
 
 ## Installation Notes
 
