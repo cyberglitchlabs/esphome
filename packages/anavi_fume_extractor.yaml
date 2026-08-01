@@ -25,9 +25,12 @@
 # - Status LED
 
 substitutions:
+  name: "anavi-fume-extractor"
   friendly_name: "ANAVI Fume Extractor"
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: "anavi.fume_extractor"
     version: "1.0.0"

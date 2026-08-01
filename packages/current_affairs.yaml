@@ -15,6 +15,7 @@
 #       ref: main
 
 substitutions:
+  name: "current-affairs"
   friendly_name: "Current Affairs"
   # The factor for the CT clamp (10A/1V)
   ct_factor: "10"
@@ -30,6 +31,8 @@ dashboard_import:
   import_full_config: false
 
 esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   project:
     name: "cyberglitchlabs.current_affairs"
     version: "1.0.0"

@@ -4,6 +4,10 @@ on:
   push:
     branches: ["main"]
   pull_request:
+  schedule:
+    # Catch breakage from new upstream ESPHome releases even when nothing
+    # in this repo has changed (runs are pip-installing the latest ESPHome).
+    - cron: "0 6 * * 1"
 
 jobs:
   validate:
@@ -20,6 +24,8 @@ jobs:
           - tests/test_plant_bot.yaml
           - tests/test_bermuda.yaml
           - tests/test_mochi.yaml
+          - tests/test_current_affairs.yaml
+          - tests/test_ikea_vindriktning.yaml
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
