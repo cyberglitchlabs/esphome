@@ -43,6 +43,15 @@ relevant pin substitution rather than editing the package.
 
 MISO is unused — the displays are write-only.
 
+**Reset pin note:** only `display_1`'s config carries `reset_pin` in
+`orbital_base.yaml`. Since GPIO13 is physically wired to all five panels,
+toggling it resets every panel at once — if each display's `ili9xxx` config
+declared its own `reset_pin`, every subsequent display's setup would re-reset
+the panels that already finished initializing, leaving only the
+last-initialized display actually showing anything (the classic symptom:
+one screen lit, the other four blank). Keep the reset wired to a single
+display only when editing this package.
+
 ## Wiring
 
 All five displays share one SPI clock/data line and DC/RST line, and are

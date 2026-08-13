@@ -161,9 +161,7 @@ display:
     dc_pin:
       number: ${orbital_dc_pin}
       allow_other_uses: true
-    reset_pin:
-      number: ${orbital_reset_pin}
-      allow_other_uses: true
+    reset_pin: ${orbital_reset_pin}
     invert_colors: true
     auto_clear_enabled: false
     update_interval: never  # LVGL drives redraws; no polling needed
@@ -174,9 +172,6 @@ display:
     cs_pin: ${orbital_cs2_pin}
     dc_pin:
       number: ${orbital_dc_pin}
-      allow_other_uses: true
-    reset_pin:
-      number: ${orbital_reset_pin}
       allow_other_uses: true
     invert_colors: true
     auto_clear_enabled: false
@@ -189,9 +184,6 @@ display:
     dc_pin:
       number: ${orbital_dc_pin}
       allow_other_uses: true
-    reset_pin:
-      number: ${orbital_reset_pin}
-      allow_other_uses: true
     invert_colors: true
     auto_clear_enabled: false
     update_interval: never
@@ -203,9 +195,6 @@ display:
     dc_pin:
       number: ${orbital_dc_pin}
       allow_other_uses: true
-    reset_pin:
-      number: ${orbital_reset_pin}
-      allow_other_uses: true
     invert_colors: true
     auto_clear_enabled: false
     update_interval: never
@@ -216,9 +205,6 @@ display:
     cs_pin: ${orbital_cs5_pin}
     dc_pin:
       number: ${orbital_dc_pin}
-      allow_other_uses: true
-    reset_pin:
-      number: ${orbital_reset_pin}
       allow_other_uses: true
     invert_colors: true
     auto_clear_enabled: false
