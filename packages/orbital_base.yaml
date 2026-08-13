@@ -153,7 +153,7 @@ spi:
   mosi_pin: ${orbital_mosi_pin}
 
 display:
-  - platform: ili9xxx
+  - platform: mipi_spi
     model: GC9A01A
     id: display_1
     spi_id: spi_bus
@@ -165,7 +165,7 @@ display:
     invert_colors: true
     auto_clear_enabled: false
     update_interval: never  # LVGL drives redraws; no polling needed
-  - platform: ili9xxx
+  - platform: mipi_spi
     model: GC9A01A
     id: display_2
     spi_id: spi_bus
@@ -176,7 +176,7 @@ display:
     invert_colors: true
     auto_clear_enabled: false
     update_interval: never
-  - platform: ili9xxx
+  - platform: mipi_spi
     model: GC9A01A
     id: display_3
     spi_id: spi_bus
@@ -187,7 +187,7 @@ display:
     invert_colors: true
     auto_clear_enabled: false
     update_interval: never
-  - platform: ili9xxx
+  - platform: mipi_spi
     model: GC9A01A
     id: display_4
     spi_id: spi_bus
@@ -198,7 +198,7 @@ display:
     invert_colors: true
     auto_clear_enabled: false
     update_interval: never
-  - platform: ili9xxx
+  - platform: mipi_spi
     model: GC9A01A
     id: display_5
     spi_id: spi_bus
