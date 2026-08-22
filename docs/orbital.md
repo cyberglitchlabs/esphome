@@ -43,6 +43,15 @@ relevant pin substitution rather than editing the package.
 
 MISO is unused — the displays are write-only.
 
+**Button polarity note:** the three navigation buttons are wired active-high
+(pressing connects the pin to 3.3V; confirmed with a multimeter), not the
+active-low pattern you might expect. `orbital_base.yaml` configures them with
+`mode: INPUT_PULLDOWN` (idle reads low, press reads high) rather than
+`INPUT_PULLUP` + `inverted: true`. This matches the original Arduino
+reference firmware's `BUTTON_MODE INPUT_PULLDOWN` constant. If you rewire a
+button to a different pin or a different Orbital unit turns out to be wired
+active-low instead, adjust the pin's `mode`/`inverted` settings accordingly.
+
 **Reset pin note:** only `display_1`'s config carries `reset_pin` in
 `orbital_base.yaml`. Since GPIO13 is physically wired to all five panels,
 toggling it resets every panel at once — if each display's `mipi_spi` config

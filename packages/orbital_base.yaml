@@ -418,8 +418,7 @@ binary_sensor:
     id: button_left
     pin:
       number: ${orbital_button_left_pin}
-      mode: INPUT_PULLUP
-      inverted: true
+      mode: INPUT_PULLDOWN
     internal: true
     on_click:
       min_length: 50ms
@@ -432,8 +431,7 @@ binary_sensor:
     id: button_right
     pin:
       number: ${orbital_button_right_pin}
-      mode: INPUT_PULLUP
-      inverted: true
+      mode: INPUT_PULLDOWN
     internal: true
     on_click:
       min_length: 50ms
@@ -446,8 +444,7 @@ binary_sensor:
     id: button_ok
     pin:
       number: ${orbital_button_ok_pin}
-      mode: INPUT_PULLUP
-      inverted: true
+      mode: INPUT_PULLDOWN
     internal: true
     on_click:
       - min_length: 50ms
