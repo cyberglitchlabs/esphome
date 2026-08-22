@@ -662,7 +662,10 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: presence_label_1
-          text: !lambda "return x;"
+          text: !lambda |-
+            if (x == "home") return std::string("Home");
+            if (x == "not_home") return std::string("Away");
+            return x.substr(0, 10);
   - platform: homeassistant
     id: presence_person2_ts
     entity_id: ${orbital_person2_entity}
@@ -670,7 +673,10 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: presence_label_2
-          text: !lambda "return x;"
+          text: !lambda |-
+            if (x == "home") return std::string("Home");
+            if (x == "not_home") return std::string("Away");
+            return x.substr(0, 10);
   - platform: homeassistant
     id: presence_person3_ts
     entity_id: ${orbital_person3_entity}
@@ -678,7 +684,10 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: presence_label_3
-          text: !lambda "return x;"
+          text: !lambda |-
+            if (x == "home") return std::string("Home");
+            if (x == "not_home") return std::string("Away");
+            return x.substr(0, 10);
   - platform: homeassistant
     id: presence_person4_ts
     entity_id: ${orbital_person4_entity}
@@ -686,7 +695,10 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: presence_label_4
-          text: !lambda "return x;"
+          text: !lambda |-
+            if (x == "home") return std::string("Home");
+            if (x == "not_home") return std::string("Away");
+            return x.substr(0, 10);
   - platform: homeassistant
     id: presence_person5_ts
     entity_id: ${orbital_person5_entity}
@@ -694,7 +706,10 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: presence_label_5
-          text: !lambda "return x;"
+          text: !lambda |-
+            if (x == "home") return std::string("Home");
+            if (x == "not_home") return std::string("Away");
+            return x.substr(0, 10);
   - platform: homeassistant
     id: custom_sensor1_ts
     entity_id: ${orbital_custom1_entity}
@@ -702,7 +717,15 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: custom_label_1
-          text: !lambda "return x;"
+          text: !lambda |-
+            char *endptr;
+            float val = strtof(x.c_str(), &endptr);
+            if (endptr != x.c_str() && *endptr == '\0') {
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%.1f", val);
+              return std::string(buf);
+            }
+            return x.substr(0, 10);
   - platform: homeassistant
     id: custom_sensor2_ts
     entity_id: ${orbital_custom2_entity}
@@ -710,7 +733,15 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: custom_label_2
-          text: !lambda "return x;"
+          text: !lambda |-
+            char *endptr;
+            float val = strtof(x.c_str(), &endptr);
+            if (endptr != x.c_str() && *endptr == '\0') {
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%.1f", val);
+              return std::string(buf);
+            }
+            return x.substr(0, 10);
   - platform: homeassistant
     id: custom_sensor3_ts
     entity_id: ${orbital_custom3_entity}
@@ -718,7 +749,15 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: custom_label_3
-          text: !lambda "return x;"
+          text: !lambda |-
+            char *endptr;
+            float val = strtof(x.c_str(), &endptr);
+            if (endptr != x.c_str() && *endptr == '\0') {
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%.1f", val);
+              return std::string(buf);
+            }
+            return x.substr(0, 10);
   - platform: homeassistant
     id: custom_sensor4_ts
     entity_id: ${orbital_custom4_entity}
@@ -726,7 +765,15 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: custom_label_4
-          text: !lambda "return x;"
+          text: !lambda |-
+            char *endptr;
+            float val = strtof(x.c_str(), &endptr);
+            if (endptr != x.c_str() && *endptr == '\0') {
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%.1f", val);
+              return std::string(buf);
+            }
+            return x.substr(0, 10);
   - platform: homeassistant
     id: custom_sensor5_ts
     entity_id: ${orbital_custom5_entity}
@@ -734,7 +781,15 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: custom_label_5
-          text: !lambda "return x;"
+          text: !lambda |-
+            char *endptr;
+            float val = strtof(x.c_str(), &endptr);
+            if (endptr != x.c_str() && *endptr == '\0') {
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%.1f", val);
+              return std::string(buf);
+            }
+            return x.substr(0, 10);
   - platform: version
     name: "ESPHome Version"
     entity_category: diagnostic
