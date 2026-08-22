@@ -78,15 +78,38 @@ Screens are numbered 1–5 left-to-right as laid out on the Orbital PCB.
 
 | Set | Screen 1 | Screen 2 | Screen 3 | Screen 4 | Screen 5 |
 |---|---|---|---|---|---|
-| Clock | Time | Date | Day of week | Uptime | WiFi signal |
-| Weather | Current temp | Humidity | Condition | Wind | Forecast |
+| Clock | Analog clock face | Date | Day of week | Uptime | WiFi signal |
+| Weather | Current temp | Humidity | Condition (icon) | Wind | Forecast |
 | Presence | Person 1 | Person 2 | Person 3 | Person 4 | Person 5 |
 | Custom | HA sensor 1 | HA sensor 2 | HA sensor 3 | HA sensor 4 | HA sensor 5 |
 
 Weather, Presence, and Custom are entirely HA-fed — point the substitutions
 below at real entities in your Home Assistant instance. The device just
 displays whatever state string HA sends; it doesn't parse or format it beyond
-what HA already gives it.
+what HA already gives it, except for the two Weather fields noted below.
+
+**Clock screen 1** is an LVGL `meter` widget (analog hour/minute hands), not
+digital text — it's driven every second by an interval that reads
+`id(orbital_time).now()` and updates the `minute_hand`/`hour_hand`
+indicators directly, rather than a `lvgl.label.update`.
+
+**Weather screen 3** (condition) renders as an icon, not text. The
+`weather_condition_ts` text sensor maps Home Assistant's `weather.*` entity
+condition strings (`sunny`, `cloudy`, `partlycloudy`, `rainy`, etc.) to glyphs
+from a Material Design Icons font subset (`weather_icons`, fetched from
+jsDelivr's `@mdi/font` package — see the `font:` block in
+`orbital_base.yaml`). An unrecognized condition string falls back to a
+"sunny-off" glyph. **Weather screens 1 and 4** (temp, wind) append the unit
+substitutions below to HA's raw state string, since ESPHome's `homeassistant`
+text_sensor platform doesn't include `unit_of_measurement` — set
+`orbital_weather_temp_unit`/`orbital_weather_wind_unit` to match whatever
+unit your actual HA entities report in (they default to `°F`/`mph`).
+
+**Dark theme:** all five displays use LVGL's `dark_mode` theme (dark
+backgrounds, light text) for readability. It's declared once, on `lvgl_1`
+only — ESPHome only allows one `theme:` block when multiple LVGL instances
+share a device (it's a single global define, not per-instance), so don't
+copy it onto `lvgl_2`..`lvgl_5` if you're editing this package.
 
 ## Navigation
 
@@ -168,5 +191,7 @@ esphome run examples/orbital_example.yaml
 | `orbital_weather_condition_entity` | `weather.home` | Weather screen 3 |
 | `orbital_weather_wind_entity` | `sensor.outdoor_wind_speed` | Weather screen 4 |
 | `orbital_weather_forecast_entity` | `sensor.weather_forecast_summary` | Weather screen 5 |
+| `orbital_weather_temp_unit` | `°F` | Appended to Weather screen 1's raw HA state |
+| `orbital_weather_wind_unit` | ` mph` | Appended to Weather screen 4's raw HA state |
 | `orbital_person1_entity`..`orbital_person5_entity` | `person.person_1`..`person.person_5` | Presence screens 1–5 |
 | `orbital_custom1_entity`..`orbital_custom5_entity` | `sensor.custom_1`..`sensor.custom_5` | Custom screens 1–5 |

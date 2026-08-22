@@ -53,6 +53,12 @@ substitutions:
   orbital_weather_wind_entity: sensor.outdoor_wind_speed
   orbital_weather_forecast_entity: sensor.weather_forecast_summary
 
+  # Units appended to the raw HA state strings above (HA's text_sensor platform
+  # only gives us the plain state, not its unit_of_measurement, so these must
+  # match whatever unit your HA entities actually report in)
+  orbital_weather_temp_unit: "°F"
+  orbital_weather_wind_unit: " mph"
+
   # Presence set — point these at your HA person.* entities.
   # Note: this repo's bermuda_base.yaml package is a bare BLE proxy with no
   # person entities of its own; if you use Bermuda for presence, point these
@@ -211,6 +217,42 @@ display:
     update_interval: never
 
 # ---------------------------------------------------------------------------
+# Fonts: Material Design Icons, subset to the weather condition glyphs HA's
+# weather integration actually reports (clear-night/cloudy/exceptional/fog/
+# hail/lightning/lightning-rainy/partlycloudy/pouring/rainy/snowy/
+# snowy-rainy/sunny/windy/windy-variant, plus a sunny-off fallback for an
+# unrecognized condition string). Fetched from jsDelivr (pinned to a specific
+# @mdi/font release, not @latest) rather than committed locally — font file:
+# paths resolve relative to whatever top-level config includes this package,
+# so a local path would need duplicating into every consumer's directory.
+# Source: https://github.com/Templarian/MaterialDesign-Webfont (SIL OFL 1.1).
+# ---------------------------------------------------------------------------
+
+font:
+  - file: "https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/fonts/materialdesignicons-webfont.ttf"
+    id: weather_icons
+    size: 64
+    bpp: 4
+    glyphs: [
+      "\U000F0594", # clear-night
+      "\U000F0590", # cloudy
+      "\U000F0F2F", # exceptional
+      "\U000F0591", # fog
+      "\U000F0592", # hail
+      "\U000F0593", # lightning
+      "\U000F067E", # lightning-rainy
+      "\U000F0595", # partlycloudy
+      "\U000F0596", # pouring
+      "\U000F0597", # rainy
+      "\U000F0598", # snowy
+      "\U000F067F", # snowy-rainy
+      "\U000F0599", # sunny
+      "\U000F059D", # windy
+      "\U000F059E", # windy-variant
+      "\U000F14E4", # sunny-off (fallback for unknown conditions)
+      ]
+
+# ---------------------------------------------------------------------------
 # LVGL: one instance per display, four pages each (Clock/Weather/Presence/Custom)
 # ---------------------------------------------------------------------------
 
@@ -220,13 +262,72 @@ lvgl:
       - display_1
     buffer_size: 10%
     default_font: montserrat_28
+    # dark_mode applies globally across all 5 LVGL instances even though it's
+    # only declared here — ESPHome only allows `theme:` on one instance when
+    # multiple LVGL instances are in play (it's one shared define, not
+    # per-instance), so don't copy this block onto lvgl_2..lvgl_5.
+    theme:
+      dark_mode: true
     pages:
       - id: clock_1
         widgets:
-          - label:
-              id: clock_time_1
+          - obj:
+              width: 240
+              height: 240
               align: CENTER
-              text: "00:00:00"
+              pad_all: 0
+              border_width: 0
+              bg_color: 0x000000
+              widgets:
+                - meter:
+                    id: clock_meter_1
+                    height: 220
+                    width: 220
+                    align: CENTER
+                    bg_opa: TRANSP
+                    border_width: 0
+                    scales:
+                      - range_from: 0 # minutes scale (outer ring of ticks)
+                        range_to: 60
+                        angle_range: 360
+                        rotation: 270
+                        ticks:
+                          width: 1
+                          count: 61
+                          length: 6
+                          color: 0x444444
+                        indicators:
+                          - line:
+                              id: minute_hand
+                              width: 3
+                              color: 0x00D9FF
+                              length: 90%
+                              value: 0
+                      - range_from: 1 # hour scale (numbered 1-12 major ticks)
+                        range_to: 12
+                        angle_range: 330
+                        rotation: 300
+                        ticks:
+                          width: 1
+                          count: 12
+                          length: 1
+                          major:
+                            stride: 1
+                            width: 3
+                            length: 14
+                            color: 0xAAAAAA
+                            label_gap: 10
+                      - range_from: 0 # hi-res hours scale, drives the hour hand
+                        range_to: 720
+                        angle_range: 360
+                        rotation: 270
+                        indicators:
+                          - line:
+                              id: hour_hand
+                              width: 5
+                              color: 0xFF9500
+                              length: 65%
+                              value: 0
       - id: weather_1
         widgets:
           - label:
@@ -294,7 +395,8 @@ lvgl:
           - label:
               id: weather_label_3
               align: CENTER
-              text: "-"
+              text_font: weather_icons
+              text: ""
       - id: presence_3
         widgets:
           - label:
@@ -378,11 +480,14 @@ lvgl:
 interval:
   - interval: 1s
     then:
-      - lvgl.label.update:
-          id: clock_time_1
-          text:
-            time_format: "%H:%M:%S"
-            time: orbital_time
+      - lvgl.indicator.update:
+          id: minute_hand
+          value: !lambda "return id(orbital_time).now().minute;"
+      - lvgl.indicator.update:
+          id: hour_hand
+          value: !lambda |-
+            auto t = id(orbital_time).now();
+            return (t.hour % 12) * 60 + t.minute;
   - interval: 60s
     then:
       - lvgl.label.update:
@@ -501,7 +606,7 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: weather_label_1
-          text: !lambda "return x;"
+          text: !lambda "return x + \"${orbital_weather_temp_unit}\";"
   - platform: homeassistant
     id: weather_humidity_ts
     entity_id: ${orbital_weather_humidity_entity}
@@ -509,7 +614,7 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: weather_label_2
-          text: !lambda "return x;"
+          text: !lambda "return x + \"%\";"
   - platform: homeassistant
     id: weather_condition_ts
     entity_id: ${orbital_weather_condition_entity}
@@ -517,7 +622,23 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: weather_label_3
-          text: !lambda "return x;"
+          text: !lambda |-
+            if (x == "clear-night") return std::string("\U000F0594");
+            if (x == "cloudy") return std::string("\U000F0590");
+            if (x == "fog") return std::string("\U000F0591");
+            if (x == "hail") return std::string("\U000F0592");
+            if (x == "lightning") return std::string("\U000F0593");
+            if (x == "lightning-rainy") return std::string("\U000F067E");
+            if (x == "partlycloudy") return std::string("\U000F0595");
+            if (x == "pouring") return std::string("\U000F0596");
+            if (x == "rainy") return std::string("\U000F0597");
+            if (x == "snowy") return std::string("\U000F0598");
+            if (x == "snowy-rainy") return std::string("\U000F067F");
+            if (x == "sunny") return std::string("\U000F0599");
+            if (x == "windy") return std::string("\U000F059D");
+            if (x == "windy-variant") return std::string("\U000F059E");
+            if (x == "exceptional") return std::string("\U000F0F2F");
+            return std::string("\U000F14E4"); // unrecognized condition
   - platform: homeassistant
     id: weather_wind_ts
     entity_id: ${orbital_weather_wind_entity}
@@ -525,7 +646,7 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: weather_label_4
-          text: !lambda "return x;"
+          text: !lambda "return x + \"${orbital_weather_wind_unit}\";"
   - platform: homeassistant
     id: weather_forecast_ts
     entity_id: ${orbital_weather_forecast_entity}
