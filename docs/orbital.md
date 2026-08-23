@@ -229,13 +229,20 @@ actions:
       entity_id: input_text.orbital_forecast_summary
     data:
       value: >-
-        {% set f = fc['weather.home'].forecast %}
+        {% set f = (fc.values() | first).forecast %}
         {% if f %}{{ f[0].temperature | round | int }}/{{ f[0].templow | round | int }}{% else %}--{% endif %}
 ```
 
 That writes today's high and low as `77/52`. Keep whatever you render under
 about ten characters — the value is truncated to ten before it reaches the
 display, and a 240px round screen has no room for more at this font size.
+
+Note that the weather entity is named exactly **once**, in `target.entity_id`.
+`get_forecasts` returns a response keyed by entity_id, and it is tempting to
+index it as `fc['weather.home']` — but then changing the entity means editing
+two places, and missing the second gives an automation that fails silently on
+every run. Since the action targets a single entity, the response has exactly
+one key, so `fc.values() | first` reads it without naming it again.
 
 The `{% if f %}` guard matters: `get_forecasts` returns an empty list when the
 weather integration is still starting up or has lost its upstream, and
