@@ -3,8 +3,14 @@ substitutions:
   friendly_name: "Orbital Test"
   wifi_ssid: test_ssid
   wifi_password: test_password
-  orbital_weather_temp_entity: sensor.test_temperature
+  orbital_weather_entity: weather.test_weather
+  orbital_weather_forecast_entity: input_text.test_forecast
   orbital_person1_entity: person.test_person
+  orbital_person1_label: "Tester"
+  orbital_custom1_entity: sensor.test_custom
+  orbital_custom1_icon: "\U000F0241"  # mdi:flash
+  orbital_custom1_label: "Custom"
+  orbital_custom1_unit: " W"
 
 esphome:
   name: ${name}

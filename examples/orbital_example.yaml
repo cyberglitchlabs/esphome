@@ -7,10 +7,27 @@
 
 substitutions:
   friendly_name: "Orbital"
-  # Optional overrides — point these at your own HA entities:
-  # orbital_weather_temp_entity: sensor.outdoor_temperature
-  # orbital_person1_entity: person.jane
-  # orbital_custom1_entity: sensor.grid_power
+
+  # Weather: one entity feeds four screens (temp / humidity / condition /
+  # wind) by reading its attributes. Units must match what it reports.
+  orbital_weather_entity: weather.home
+  orbital_weather_temp_unit: "°F"
+  orbital_weather_wind_unit: " mph"
+
+  # Forecast: HA has no forecast attribute any more, so this must be an entity
+  # you precompute. See docs/orbital.md for the helper + automation.
+  orbital_weather_forecast_entity: input_text.orbital_forecast_summary
+
+  # Presence: entity plus a short name to caption the screen with.
+  orbital_person1_entity: person.jane
+  orbital_person1_label: "Jane"
+
+  # Custom: entity, an icon from the palette baked into the font, a caption,
+  # and a unit appended to numeric states.
+  orbital_custom1_entity: sensor.grid_power
+  orbital_custom1_icon: "\U000F0241"  # mdi:flash
+  orbital_custom1_label: "Grid"
+  orbital_custom1_unit: " W"
 
 esphome:
   name: orbital

@@ -46,36 +46,78 @@ substitutions:
   # Auto-cycle timing (only used while auto-cycle is toggled on via long-press OK)
   orbital_autocycle_interval: 30s
 
-  # Weather set — point these at any HA weather-related entities you have
-  orbital_weather_temp_entity: sensor.outdoor_temperature
-  orbital_weather_humidity_entity: sensor.outdoor_humidity
-  orbital_weather_condition_entity: weather.home
-  orbital_weather_wind_entity: sensor.outdoor_wind_speed
-  orbital_weather_forecast_entity: sensor.weather_forecast_summary
+  # Weather set — screens 1/2/3/4 all read from a SINGLE HA weather entity:
+  # temperature, humidity and wind_speed come off its attributes, and its
+  # plain state drives the condition icon. Any weather.* entity works.
+  #
+  # BREAKING CHANGE (was: four separate orbital_weather_*_entity keys). The
+  # old keys pointed at standalone sensor.* entities; attributes replace them
+  # because a weather entity always carries all four in lockstep, and numeric
+  # attributes arrive as floats we can round rather than as raw state strings.
+  orbital_weather_entity: weather.home
 
-  # Units appended to the raw HA state strings above (HA's text_sensor platform
-  # only gives us the plain state, not its unit_of_measurement, so these must
-  # match whatever unit your HA entities actually report in)
+  # Screen 5 — the forecast. HA removed the `forecast` attribute from weather
+  # entities in 2024.4, so a forecast can only reach ESPHome through an entity
+  # you precompute in HA (an input_text driven by an automation that calls
+  # weather.get_forecasts). docs/orbital.md has the automation. Any entity
+  # holding a short string works here.
+  orbital_weather_forecast_entity: input_text.orbital_forecast_summary
+
+  # Units appended to the weather values. Attributes arrive as bare numbers
+  # with no unit attached, so these must match what your weather entity
+  # reports in — check its temperature_unit / wind_speed_unit attributes.
   orbital_weather_temp_unit: "°F"
   orbital_weather_wind_unit: " mph"
 
-  # Presence set — point these at your HA person.* entities.
+  # Presence set — point these at your HA person.* entities. Each screen shows
+  # a state icon (home / walking / unknown), the state, and the person's name,
+  # so give every slot a _label short enough to fit a 240px round display.
   # Note: this repo's bermuda_base.yaml package is a bare BLE proxy with no
   # person entities of its own; if you use Bermuda for presence, point these
   # at whatever entities the Bermuda HA integration created for you.
   orbital_person1_entity: person.person_1
+  orbital_person1_label: "Person 1"
   orbital_person2_entity: person.person_2
+  orbital_person2_label: "Person 2"
   orbital_person3_entity: person.person_3
+  orbital_person3_label: "Person 3"
   orbital_person4_entity: person.person_4
+  orbital_person4_label: "Person 4"
   orbital_person5_entity: person.person_5
+  orbital_person5_label: "Person 5"
 
   # Custom set — point these at absolutely anything HA already tracks
-  # (energy, stocks, whatever). The device just displays the entity's state.
+  # (energy, stocks, whatever). Each slot takes four keys:
+  #   _entity  the HA entity whose state is displayed
+  #   _icon    an MDI codepoint, baked into the font at build time (below)
+  #   _label   a short caption so the number means something
+  #   _unit    appended to numeric states; leave "" for text states.
+  #            Must not contain a literal % — it is used as a printf format.
+  # _icon must be one of the codepoints baked into the weather_icons font
+  # below; slots may reuse the same icon. The palette there covers the common
+  # cases (gauge, flash, currency, battery, wifi, chart, clock, leaf, car,
+  # thermometer, water, printer, server, bell, package) — to use anything
+  # else, add its codepoint to that glyph list too.
   orbital_custom1_entity: sensor.custom_1
+  orbital_custom1_icon: "\U000F029A"  # mdi:gauge
+  orbital_custom1_label: "Custom 1"
+  orbital_custom1_unit: ""
   orbital_custom2_entity: sensor.custom_2
+  orbital_custom2_icon: "\U000F029A"  # mdi:gauge
+  orbital_custom2_label: "Custom 2"
+  orbital_custom2_unit: ""
   orbital_custom3_entity: sensor.custom_3
+  orbital_custom3_icon: "\U000F029A"  # mdi:gauge
+  orbital_custom3_label: "Custom 3"
+  orbital_custom3_unit: ""
   orbital_custom4_entity: sensor.custom_4
+  orbital_custom4_icon: "\U000F029A"  # mdi:gauge
+  orbital_custom4_label: "Custom 4"
+  orbital_custom4_unit: ""
   orbital_custom5_entity: sensor.custom_5
+  orbital_custom5_icon: "\U000F029A"  # mdi:gauge
+  orbital_custom5_label: "Custom 5"
+  orbital_custom5_unit: ""
 
 esphome:
   name: "${name}"
@@ -250,6 +292,38 @@ font:
       "\U000F059D", # windy
       "\U000F059E", # windy-variant
       "\U000F14E4", # sunny-off (fallback for unknown conditions)
+      # Measurement icons for the weather screens that show a number
+      "\U000F050F", # thermometer  -> temperature
+      "\U000F058E", # water-percent -> humidity
+      "\U000F0E17", # calendar-month -> forecast
+      # Presence state icons
+      "\U000F02DC", # home        -> person is home
+      "\U000F0583", # walk        -> person is away
+      "\U000F02D7", # help-circle -> unknown / unavailable
+      # General-purpose palette for the custom slots. This list is static on
+      # purpose: ESPHome rejects a font whose glyph list contains duplicates,
+      # so interpolating the five orbital_custom*_icon substitutions here
+      # would break as soon as two slots picked the same icon (two power
+      # readings both wanting mdi:flash, say). Baking a fixed palette instead
+      # means a substitution only selects a glyph that is already present, and
+      # slots may freely repeat. To use an icon that is not listed, add its
+      # codepoint here as well as setting the substitution.
+      "\U000F029A", # gauge
+      "\U000F0241", # flash
+      "\U000F140B", # lightning-bolt
+      "\U000F01C1", # currency-usd
+      "\U000F0079", # battery
+      "\U000F05A9", # wifi
+      "\U000F012A", # chart-line
+      "\U000F0150", # clock-outline
+      "\U000F032A", # leaf
+      "\U000F010B", # car
+      "\U000F0F54", # home-thermometer
+      "\U000F058C", # water
+      "\U000F042B", # printer-3d
+      "\U000F048D", # server-network
+      "\U000F009A", # bell
+      "\U000F03D6", # package-variant
       ]
 
 # ---------------------------------------------------------------------------
@@ -331,21 +405,59 @@ lvgl:
       - id: weather_1
         widgets:
           - label:
+              id: weather_icon_1
+              align: CENTER
+              y: -34
+              text_font: weather_icons
+              text_color: 0xFF7A33
+              text: "\U000F050F"
+          - label:
               id: weather_label_1
               align: CENTER
+              y: 18
               text: "-"
       - id: presence_1
         widgets:
           - label:
+              id: presence_icon_1
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x5A6472
+              text: "\U000F02D7"
+          - label:
               id: presence_label_1
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: presence_name_1
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_person1_label}"
       - id: custom_1
         widgets:
           - label:
+              id: custom_icon_1
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x00D9FF
+              text: "${orbital_custom1_icon}"
+          - label:
               id: custom_label_1
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: custom_name_1
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_custom1_label}"
 
   - id: lvgl_2
     displays:
@@ -362,21 +474,59 @@ lvgl:
       - id: weather_2
         widgets:
           - label:
+              id: weather_icon_2
+              align: CENTER
+              y: -34
+              text_font: weather_icons
+              text_color: 0x00B4D8
+              text: "\U000F058E"
+          - label:
               id: weather_label_2
               align: CENTER
+              y: 18
               text: "-"
       - id: presence_2
         widgets:
           - label:
+              id: presence_icon_2
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x5A6472
+              text: "\U000F02D7"
+          - label:
               id: presence_label_2
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: presence_name_2
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_person2_label}"
       - id: custom_2
         widgets:
           - label:
+              id: custom_icon_2
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x00D9FF
+              text: "${orbital_custom2_icon}"
+          - label:
               id: custom_label_2
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: custom_name_2
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_custom2_label}"
 
   - id: lvgl_3
     displays:
@@ -400,15 +550,45 @@ lvgl:
       - id: presence_3
         widgets:
           - label:
+              id: presence_icon_3
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x5A6472
+              text: "\U000F02D7"
+          - label:
               id: presence_label_3
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: presence_name_3
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_person3_label}"
       - id: custom_3
         widgets:
           - label:
+              id: custom_icon_3
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x00D9FF
+              text: "${orbital_custom3_icon}"
+          - label:
               id: custom_label_3
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: custom_name_3
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_custom3_label}"
 
   - id: lvgl_4
     displays:
@@ -425,21 +605,59 @@ lvgl:
       - id: weather_4
         widgets:
           - label:
+              id: weather_icon_4
+              align: CENTER
+              y: -34
+              text_font: weather_icons
+              text_color: 0x9AA5B1
+              text: "\U000F059D"
+          - label:
               id: weather_label_4
               align: CENTER
+              y: 18
               text: "-"
       - id: presence_4
         widgets:
           - label:
+              id: presence_icon_4
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x5A6472
+              text: "\U000F02D7"
+          - label:
               id: presence_label_4
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: presence_name_4
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_person4_label}"
       - id: custom_4
         widgets:
           - label:
+              id: custom_icon_4
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x00D9FF
+              text: "${orbital_custom4_icon}"
+          - label:
               id: custom_label_4
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: custom_name_4
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_custom4_label}"
 
   - id: lvgl_5
     displays:
@@ -456,21 +674,59 @@ lvgl:
       - id: weather_5
         widgets:
           - label:
+              id: weather_icon_5
+              align: CENTER
+              y: -34
+              text_font: weather_icons
+              text_color: 0x8B7BE8
+              text: "\U000F0E17"
+          - label:
               id: weather_label_5
               align: CENTER
+              y: 18
               text: "-"
       - id: presence_5
         widgets:
           - label:
+              id: presence_icon_5
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x5A6472
+              text: "\U000F02D7"
+          - label:
               id: presence_label_5
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: presence_name_5
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_person5_label}"
       - id: custom_5
         widgets:
           - label:
+              id: custom_icon_5
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x00D9FF
+              text: "${orbital_custom5_icon}"
+          - label:
               id: custom_label_5
               align: CENTER
+              y: 4
               text: "-"
+          - label:
+              id: custom_name_5
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${orbital_custom5_label}"
 
 # ---------------------------------------------------------------------------
 # Interval: drive Clock page labels from time, plus the Task 8 auto-cycle
@@ -586,6 +842,44 @@ sensor:
             format: "%.0f s"
             args: [x]
 
+  # Weather numerics, read as attributes off the single weather entity. Using
+  # the numeric platform (rather than text_sensor) means x is a float, so the
+  # value can be rounded for display — HA's raw state string would give us
+  # "8.780000000000001" for wind speed.
+  - platform: homeassistant
+    id: weather_temp_num
+    entity_id: ${orbital_weather_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_1
+          text:
+            format: "%.0f${orbital_weather_temp_unit}"
+            args: [x]
+  - platform: homeassistant
+    id: weather_humidity_num
+    entity_id: ${orbital_weather_entity}
+    attribute: humidity
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_2
+          text:
+            format: "%.0f%%"
+            args: [x]
+  - platform: homeassistant
+    id: weather_wind_num
+    entity_id: ${orbital_weather_entity}
+    attribute: wind_speed
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_4
+          text:
+            format: "%.0f${orbital_weather_wind_unit}"
+            args: [x]
+
 button:
   - platform: restart
     name: "Restart"
@@ -599,25 +893,10 @@ button:
 # ---------------------------------------------------------------------------
 
 text_sensor:
-  - platform: homeassistant
-    id: weather_temp_ts
-    entity_id: ${orbital_weather_temp_entity}
-    internal: true
-    on_value:
-      - lvgl.label.update:
-          id: weather_label_1
-          text: !lambda "return x + \"${orbital_weather_temp_unit}\";"
-  - platform: homeassistant
-    id: weather_humidity_ts
-    entity_id: ${orbital_weather_humidity_entity}
-    internal: true
-    on_value:
-      - lvgl.label.update:
-          id: weather_label_2
-          text: !lambda "return x + \"%\";"
+  # Screen 3: the weather entity's own state, mapped to a condition glyph.
   - platform: homeassistant
     id: weather_condition_ts
-    entity_id: ${orbital_weather_condition_entity}
+    entity_id: ${orbital_weather_entity}
     internal: true
     on_value:
       - lvgl.label.update:
@@ -639,14 +918,9 @@ text_sensor:
             if (x == "windy-variant") return std::string("\U000F059E");
             if (x == "exceptional") return std::string("\U000F0F2F");
             return std::string("\U000F14E4"); // unrecognized condition
-  - platform: homeassistant
-    id: weather_wind_ts
-    entity_id: ${orbital_weather_wind_entity}
-    internal: true
-    on_value:
-      - lvgl.label.update:
-          id: weather_label_4
-          text: !lambda "return x + \"${orbital_weather_wind_unit}\";"
+
+  # Screen 5: a short forecast string precomputed in HA. Truncated because the
+  # round display fits roughly ten characters at montserrat_28.
   - platform: homeassistant
     id: weather_forecast_ts
     entity_id: ${orbital_weather_forecast_entity}
@@ -654,7 +928,8 @@ text_sensor:
     on_value:
       - lvgl.label.update:
           id: weather_label_5
-          text: !lambda "return x;"
+          text: !lambda "return x.substr(0, 10);"
+
   - platform: homeassistant
     id: presence_person1_ts
     entity_id: ${orbital_person1_entity}
@@ -666,6 +941,17 @@ text_sensor:
             if (x == "home") return std::string("Home");
             if (x == "not_home") return std::string("Away");
             return x.substr(0, 10);
+      - lvgl.label.update:
+          id: presence_icon_1
+          text: !lambda |-
+            if (x == "home") return std::string("\U000F02DC");
+            if (x == "not_home") return std::string("\U000F0583");
+            return std::string("\U000F02D7");
+          text_color: !lambda |-
+            if (x == "home") return lv_color_make(52, 199, 89);
+            if (x == "not_home") return lv_color_make(255, 149, 0);
+            return lv_color_make(90, 100, 114);
+
   - platform: homeassistant
     id: presence_person2_ts
     entity_id: ${orbital_person2_entity}
@@ -677,6 +963,17 @@ text_sensor:
             if (x == "home") return std::string("Home");
             if (x == "not_home") return std::string("Away");
             return x.substr(0, 10);
+      - lvgl.label.update:
+          id: presence_icon_2
+          text: !lambda |-
+            if (x == "home") return std::string("\U000F02DC");
+            if (x == "not_home") return std::string("\U000F0583");
+            return std::string("\U000F02D7");
+          text_color: !lambda |-
+            if (x == "home") return lv_color_make(52, 199, 89);
+            if (x == "not_home") return lv_color_make(255, 149, 0);
+            return lv_color_make(90, 100, 114);
+
   - platform: homeassistant
     id: presence_person3_ts
     entity_id: ${orbital_person3_entity}
@@ -688,6 +985,17 @@ text_sensor:
             if (x == "home") return std::string("Home");
             if (x == "not_home") return std::string("Away");
             return x.substr(0, 10);
+      - lvgl.label.update:
+          id: presence_icon_3
+          text: !lambda |-
+            if (x == "home") return std::string("\U000F02DC");
+            if (x == "not_home") return std::string("\U000F0583");
+            return std::string("\U000F02D7");
+          text_color: !lambda |-
+            if (x == "home") return lv_color_make(52, 199, 89);
+            if (x == "not_home") return lv_color_make(255, 149, 0);
+            return lv_color_make(90, 100, 114);
+
   - platform: homeassistant
     id: presence_person4_ts
     entity_id: ${orbital_person4_entity}
@@ -699,6 +1007,17 @@ text_sensor:
             if (x == "home") return std::string("Home");
             if (x == "not_home") return std::string("Away");
             return x.substr(0, 10);
+      - lvgl.label.update:
+          id: presence_icon_4
+          text: !lambda |-
+            if (x == "home") return std::string("\U000F02DC");
+            if (x == "not_home") return std::string("\U000F0583");
+            return std::string("\U000F02D7");
+          text_color: !lambda |-
+            if (x == "home") return lv_color_make(52, 199, 89);
+            if (x == "not_home") return lv_color_make(255, 149, 0);
+            return lv_color_make(90, 100, 114);
+
   - platform: homeassistant
     id: presence_person5_ts
     entity_id: ${orbital_person5_entity}
@@ -710,6 +1029,17 @@ text_sensor:
             if (x == "home") return std::string("Home");
             if (x == "not_home") return std::string("Away");
             return x.substr(0, 10);
+      - lvgl.label.update:
+          id: presence_icon_5
+          text: !lambda |-
+            if (x == "home") return std::string("\U000F02DC");
+            if (x == "not_home") return std::string("\U000F0583");
+            return std::string("\U000F02D7");
+          text_color: !lambda |-
+            if (x == "home") return lv_color_make(52, 199, 89);
+            if (x == "not_home") return lv_color_make(255, 149, 0);
+            return lv_color_make(90, 100, 114);
+
   - platform: homeassistant
     id: custom_sensor1_ts
     entity_id: ${orbital_custom1_entity}
@@ -721,11 +1051,12 @@ text_sensor:
             char *endptr;
             float val = strtof(x.c_str(), &endptr);
             if (endptr != x.c_str() && *endptr == '\0') {
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%.1f", val);
+              char buf[24];
+              snprintf(buf, sizeof(buf), "%.1f${orbital_custom1_unit}", val);
               return std::string(buf);
             }
             return x.substr(0, 10);
+
   - platform: homeassistant
     id: custom_sensor2_ts
     entity_id: ${orbital_custom2_entity}
@@ -737,11 +1068,12 @@ text_sensor:
             char *endptr;
             float val = strtof(x.c_str(), &endptr);
             if (endptr != x.c_str() && *endptr == '\0') {
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%.1f", val);
+              char buf[24];
+              snprintf(buf, sizeof(buf), "%.1f${orbital_custom2_unit}", val);
               return std::string(buf);
             }
             return x.substr(0, 10);
+
   - platform: homeassistant
     id: custom_sensor3_ts
     entity_id: ${orbital_custom3_entity}
@@ -753,11 +1085,12 @@ text_sensor:
             char *endptr;
             float val = strtof(x.c_str(), &endptr);
             if (endptr != x.c_str() && *endptr == '\0') {
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%.1f", val);
+              char buf[24];
+              snprintf(buf, sizeof(buf), "%.1f${orbital_custom3_unit}", val);
               return std::string(buf);
             }
             return x.substr(0, 10);
+
   - platform: homeassistant
     id: custom_sensor4_ts
     entity_id: ${orbital_custom4_entity}
@@ -769,11 +1102,12 @@ text_sensor:
             char *endptr;
             float val = strtof(x.c_str(), &endptr);
             if (endptr != x.c_str() && *endptr == '\0') {
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%.1f", val);
+              char buf[24];
+              snprintf(buf, sizeof(buf), "%.1f${orbital_custom4_unit}", val);
               return std::string(buf);
             }
             return x.substr(0, 10);
+
   - platform: homeassistant
     id: custom_sensor5_ts
     entity_id: ${orbital_custom5_entity}
@@ -785,11 +1119,12 @@ text_sensor:
             char *endptr;
             float val = strtof(x.c_str(), &endptr);
             if (endptr != x.c_str() && *endptr == '\0') {
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%.1f", val);
+              char buf[24];
+              snprintf(buf, sizeof(buf), "%.1f${orbital_custom5_unit}", val);
               return std::string(buf);
             }
             return x.substr(0, 10);
+
   - platform: version
     name: "ESPHome Version"
     entity_category: diagnostic

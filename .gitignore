@@ -9,3 +9,5 @@
 .claude
 opencode.json
 skills-lock.json
+.aider*
+.superpowers/
