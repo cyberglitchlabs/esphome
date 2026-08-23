@@ -46,6 +46,23 @@ substitutions:
   # Auto-cycle timing (only used while auto-cycle is toggled on via long-press OK)
   orbital_autocycle_interval: 30s
 
+  # Clock screen 4 computes sunrise/sunset on-device rather than reading
+  # sun.sun from HA: no ISO-8601/timezone parsing, and it keeps working while
+  # HA is down. Set these in YOUR DEVICE YAML, not here. Two decimal places is
+  # about 1 km, which moves sunrise by a couple of seconds -- there is no
+  # reason to publish your house to more precision than that.
+  orbital_latitude: "0.00"
+  orbital_longitude: "0.00"
+
+  # Clock screen 3: an HA calendar whose next event describes a waste pickup.
+  # Read via its `description` attribute, which carries the full combined text
+  # ("Garbage, recycling, and yard waste") rather than a single stream.
+  orbital_waste_calendar_entity: calendar.recollect
+
+  # Clock screen 5
+  orbital_indoor_entity: sensor.indoor_temperature
+  orbital_indoor_unit: "°F"
+
   # Weather set — screens 1/2/3/4 all read from a SINGLE HA weather entity:
   # temperature, humidity and wind_speed come off its attributes, and its
   # plain state drives the condition icon. Any weather.* entity works.
@@ -178,6 +195,11 @@ time:
   - platform: homeassistant
     id: orbital_time
 
+sun:
+  id: orbital_sun
+  latitude: ${orbital_latitude}
+  longitude: ${orbital_longitude}
+
 globals:
   - id: current_set
     type: int
@@ -296,6 +318,11 @@ font:
       "\U000F050F", # thermometer  -> temperature
       "\U000F058E", # water-percent -> humidity
       "\U000F0E17", # calendar-month -> forecast
+      # Clock-set icons
+      "\U000F0A79", # trash-can     -> waste pickup
+      "\U000F044C", # recycle       -> recycling included this week
+      "\U000F059C", # weather-sunset-up   -> next event is sunrise
+      "\U000F059B", # weather-sunset-down -> next event is sunset
       # Presence state icons
       "\U000F02DC", # home        -> person is home
       "\U000F0583", # walk        -> person is away
@@ -468,9 +495,25 @@ lvgl:
       - id: clock_2
         widgets:
           - label:
+              id: clock_month_2
+              align: CENTER
+              y: -52
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "---"
+          - label:
               id: clock_date_2
               align: CENTER
-              text: "0000-00-00"
+              y: -4
+              text_font: montserrat_48
+              text: "00"
+          - label:
+              id: clock_dow_2
+              align: CENTER
+              y: 42
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "---"
       - id: weather_2
         widgets:
           - label:
@@ -536,9 +579,29 @@ lvgl:
     pages:
       - id: clock_3
         widgets:
+          # Both icons are always present in the same place; only the recycle
+          # symbol's colour changes. Position never moving is what makes it
+          # readable at a glance instead of something you have to parse.
           - label:
-              id: clock_day_3
+              id: waste_trash_3
               align: CENTER
+              x: -34
+              y: -30
+              text_font: weather_icons
+              text_color: 0xC9D1D9
+              text: "\U000F0A79"
+          - label:
+              id: waste_recycle_3
+              align: CENTER
+              x: 34
+              y: -30
+              text_font: weather_icons
+              text_color: 0x22272E
+              text: "\U000F044C"
+          - label:
+              id: waste_when_3
+              align: CENTER
+              y: 38
               text: "-"
       - id: weather_3
         widgets:
@@ -599,9 +662,24 @@ lvgl:
       - id: clock_4
         widgets:
           - label:
-              id: clock_uptime_4
+              id: sun_icon_4
               align: CENTER
-              text: "0 s"
+              y: -44
+              text_font: weather_icons
+              text_color: 0xFFC64B
+              text: "\U000F059C"
+          - label:
+              id: sun_time_4
+              align: CENTER
+              y: 4
+              text: "--:--"
+          - label:
+              id: sun_label_4
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "---"
       - id: weather_4
         widgets:
           - label:
@@ -668,9 +746,24 @@ lvgl:
       - id: clock_5
         widgets:
           - label:
-              id: clock_wifi_5
+              id: indoor_icon_5
               align: CENTER
-              text: "0 dBm"
+              y: -44
+              text_font: weather_icons
+              text_color: 0xFF7A33
+              text: "\U000F050F"
+          - label:
+              id: indoor_label_5
+              align: CENTER
+              y: 4
+              text: "-"
+          - label:
+              id: indoor_name_5
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "INDOOR"
       - id: weather_5
         widgets:
           - label:
@@ -746,16 +839,29 @@ interval:
             return (t.hour % 12) * 60 + t.minute;
   - interval: 60s
     then:
+      # Calendar page. strftime's day-of-month is zero-padded (%d) or
+      # space-padded (%e) and the no-pad form is a GNU extension, so the
+      # number comes from the field directly instead.
       - lvgl.label.update:
           id: clock_date_2
-          text:
-            time_format: "%Y-%m-%d"
-            time: orbital_time
+          text: !lambda |-
+            char buf[4];
+            snprintf(buf, sizeof(buf), "%d", id(orbital_time).now().day_of_month);
+            return std::string(buf);
       - lvgl.label.update:
-          id: clock_day_3
-          text:
-            time_format: "%A"
-            time: orbital_time
+          id: clock_month_2
+          text: !lambda |-
+            std::string s = id(orbital_time).now().strftime("%b");
+            for (auto &c : s) c = toupper(c);
+            return s;
+      - lvgl.label.update:
+          id: clock_dow_2
+          text: !lambda |-
+            std::string s = id(orbital_time).now().strftime("%A");
+            for (auto &c : s) c = toupper(c);
+            return s;
+      # Sunrise/sunset: show whichever comes next.
+      - script.execute: update_sun_screen
   - interval: ${orbital_autocycle_interval}
     then:
       - if:
@@ -824,22 +930,24 @@ sensor:
     name: "WiFi Signal"
     update_interval: 60s
     entity_category: diagnostic
-    on_value:
-      - lvgl.label.update:
-          id: clock_wifi_5
-          text:
-            format: "%.0f dBm"
-            args: [x]
+    # No longer drives a screen -- kept as an HA diagnostic entity, which is
+    # where signal strength is actually useful.
   - platform: uptime
     id: uptime_sensor
     name: "Uptime"
     update_interval: 60s
     entity_category: diagnostic
+    # No longer drives a screen -- kept as an HA diagnostic entity.
+
+  - platform: homeassistant
+    id: indoor_temp_num
+    entity_id: ${orbital_indoor_entity}
+    internal: true
     on_value:
       - lvgl.label.update:
-          id: clock_uptime_4
+          id: indoor_label_5
           text:
-            format: "%.0f s"
+            format: "%.1f${orbital_indoor_unit}"
             args: [x]
 
   # Weather numerics, read as attributes off the single weather entity. Using
@@ -918,6 +1026,24 @@ text_sensor:
             if (x == "windy-variant") return std::string("\U000F059E");
             if (x == "exceptional") return std::string("\U000F0F2F");
             return std::string("\U000F14E4"); // unrecognized condition
+
+  # Clock screen 3: the waste calendar's next event. `description` carries
+  # the combined text for the whole pickup; `message` would give only the
+  # first of several same-day events.
+  - platform: homeassistant
+    id: waste_desc_ts
+    entity_id: ${orbital_waste_calendar_entity}
+    attribute: description
+    internal: true
+    on_value:
+      - script.execute: update_waste_screen
+  - platform: homeassistant
+    id: waste_start_ts
+    entity_id: ${orbital_waste_calendar_entity}
+    attribute: start_time
+    internal: true
+    on_value:
+      - script.execute: update_waste_screen
 
   # Screen 5: a short forecast string precomputed in HA. Truncated because the
   # round display fits roughly ten characters at montserrat_28.
@@ -1158,6 +1284,68 @@ light:
 # ---------------------------------------------------------------------------
 
 script:
+  - id: update_sun_screen
+    mode: restart
+    then:
+      - lambda: |-
+          // -0.833 deg is the standard refraction-corrected horizon.
+          auto sunrise = id(orbital_sun).sunrise(-0.833);
+          auto sunset = id(orbital_sun).sunset(-0.833);
+          const bool day = id(orbital_sun).is_above_horizon();
+          auto next = day ? sunset : sunrise;
+          if (!next.has_value())
+            return;   // no fix yet (clock not synced, or polar day/night)
+          lv_label_set_text(id(sun_time_4), next->strftime("%H:%M").c_str());
+          lv_label_set_text(id(sun_label_4), day ? "SUNSET" : "SUNRISE");
+          lv_label_set_text(id(sun_icon_4),
+                            day ? "\U000F059B" : "\U000F059C");
+
+  - id: update_waste_screen
+    mode: restart
+    then:
+      - lambda: |-
+          // Recycling is the only stream that varies week to week here -
+          // garbage and yard waste ride along on every pickup - so the
+          // recycle glyph lights up and everything else stays put.
+          std::string d = id(waste_desc_ts).state;
+          for (auto &c : d) c = tolower(c);
+          const bool recycling = d.find("recycl") != std::string::npos;
+          lv_obj_set_style_text_color(
+              id(waste_recycle_3),
+              recycling ? lv_color_make(52, 199, 89) : lv_color_make(34, 39, 53),
+              LV_PART_MAIN);
+
+          // "2026-08-25 00:00:00" -> TODAY / TOMORROW / a weekday.
+          ESPTime pickup{};
+          if (!ESPTime::strptime(id(waste_start_ts).state, pickup)) {
+            lv_label_set_text(id(waste_when_3), "-");
+            return;
+          }
+          // strptime fills the calendar fields but not day_of_week, so round
+          // trip through the epoch to get a fully populated struct.
+          pickup.recalc_timestamp_utc(false);
+          pickup = ESPTime::from_epoch_utc(pickup.timestamp);
+
+          auto now = id(orbital_time).now();
+          auto tomorrow = now;
+          tomorrow.increment_day();
+
+          const char *when;
+          if (pickup.year == now.year && pickup.month == now.month &&
+              pickup.day_of_month == now.day_of_month) {
+            when = "TODAY";
+          } else if (pickup.year == tomorrow.year &&
+                     pickup.month == tomorrow.month &&
+                     pickup.day_of_month == tomorrow.day_of_month) {
+            when = "TOMORROW";
+          } else {
+            static const char *const DOW[] = {"SUN", "MON", "TUE", "WED",
+                                              "THU", "FRI", "SAT"};
+            const int idx = pickup.day_of_week - 1;   // sunday == 1
+            when = (idx >= 0 && idx < 7) ? DOW[idx] : "-";
+          }
+          lv_label_set_text(id(waste_when_3), when);
+
   - id: show_current_set
     mode: restart
     then:

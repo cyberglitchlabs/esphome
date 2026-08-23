@@ -4,6 +4,10 @@ substitutions:
   wifi_ssid: test_ssid
   wifi_password: test_password
   orbital_weather_entity: weather.test_weather
+  orbital_latitude: "41.59"
+  orbital_longitude: "-93.62"
+  orbital_waste_calendar_entity: calendar.test_waste
+  orbital_indoor_entity: sensor.test_indoor
   orbital_weather_forecast_entity: input_text.test_forecast
   orbital_person1_entity: person.test_person
   orbital_person1_label: "Tester"

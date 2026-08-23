@@ -78,7 +78,7 @@ Screens are numbered 1–5 left-to-right as laid out on the Orbital PCB.
 
 | Set | Screen 1 | Screen 2 | Screen 3 | Screen 4 | Screen 5 |
 |---|---|---|---|---|---|
-| Clock | Analog clock face | Date | Day of week | Uptime | WiFi signal |
+| Clock | Analog clock face | Date (calendar page) | Waste pickup | Sunrise/sunset | Indoor temp |
 | Weather | Current temp | Humidity | Condition (icon) | Wind | Forecast |
 | Presence | Person 1 | Person 2 | Person 3 | Person 4 | Person 5 |
 | Custom | HA sensor 1 | HA sensor 2 | HA sensor 3 | HA sensor 4 | HA sensor 5 |
@@ -191,6 +191,44 @@ in an issue if you need it promoted to a substitution).
 The five displays, three buttons, and status light are internal-only (not
 exposed as separate HA entities) — they're driven entirely by the package's
 own automations.
+
+## Clock Set Notes
+
+**Screen 2** is a calendar page - month, a large day number in
+`montserrat_48`, and the weekday. Driven by the existing 60-second interval.
+The day number is read from `ESPTime::day_of_month` rather than `strftime`,
+because the non-padded day-of-month specifier is a GNU extension and this
+toolchain gives you either a zero-padded `%d` or a space-padded `%e`.
+
+**Screen 3** shows the next waste pickup. It reads the `description` attribute
+of `orbital_waste_calendar_entity`, not `message`: a hauler that collects
+several streams on one day files them as separate same-day events, so
+`message` returns only whichever sorts first while `description` carries the
+combined text ("Garbage, recycling, and yard waste").
+
+Both a trash and a recycle glyph are always drawn, in fixed positions. Only
+the recycle glyph's colour changes - green when the description mentions
+recycling, near-black otherwise. Nothing moves between weeks, so the screen is
+read by colour rather than by parsing text. This assumes the varying stream is
+recycling; if your hauler varies a different one, adjust the substring test in
+the `update_waste_screen` script.
+
+The day is resolved to `TODAY` / `TOMORROW` / a weekday abbreviation.
+`ESPTime::strptime` populates the calendar fields but not `day_of_week`, hence
+the round trip through `recalc_timestamp_utc()` and `from_epoch_utc()`.
+
+**Screen 4** computes sunrise and sunset on-device via ESPHome's `sun:`
+component rather than reading `sun.sun` from Home Assistant. That avoids
+parsing HA's ISO-8601 UTC timestamps and converting them to local time, and it
+keeps working while HA is unreachable. It requires `orbital_latitude` and
+`orbital_longitude`, which belong in **your device YAML, not this package**.
+Two decimal places is roughly 1 km and moves sunrise by a couple of seconds -
+there is no reason to be more precise about where you live than that.
+
+**Screen 5** is a plain HA subscription for an indoor temperature.
+
+The `uptime` and `wifi_signal` sensors still exist as HA diagnostic entities;
+they simply no longer occupy a display.
 
 ## Forecast Setup
 
