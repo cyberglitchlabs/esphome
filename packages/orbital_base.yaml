@@ -494,25 +494,34 @@ lvgl:
     pages:
       - id: clock_2
         widgets:
+          # Month and weekday are content here, not captions, so they use
+          # montserrat_28 rather than the montserrat_14 used for captions
+          # elsewhere. 28 is already compiled in as default_font, so this
+          # costs no flash -- a new size would have.
+          #
+          # Vertical budget on the 240px circle: month spans -70..-42, the
+          # day number -32..+16, weekday +30..+58. The widest weekday,
+          # WEDNESDAY, is ~144px at this size; the circle is 210px wide at
+          # y=+58, so it clears the rim.
           - label:
               id: clock_month_2
               align: CENTER
-              y: -52
-              text_font: montserrat_14
-              text_color: 0x6B7380
+              y: -56
+              text_font: montserrat_28
+              text_color: 0xB6BEC9
               text: "---"
           - label:
               id: clock_date_2
               align: CENTER
-              y: -4
+              y: -8
               text_font: montserrat_48
               text: "00"
           - label:
               id: clock_dow_2
               align: CENTER
-              y: 42
-              text_font: montserrat_14
-              text_color: 0x6B7380
+              y: 44
+              text_font: montserrat_28
+              text_color: 0xB6BEC9
               text: "---"
       - id: weather_2
         widgets:
