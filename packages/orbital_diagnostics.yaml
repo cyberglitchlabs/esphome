@@ -1,0 +1,47 @@
+# ---------------------------------------------------------------------------
+# Diagnostic entities: status, WiFi signal, uptime, restart/safe-mode
+# buttons, firmware version, WiFi info. Not wired to any screen.
+# ---------------------------------------------------------------------------
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+    entity_category: diagnostic
+
+sensor:
+  - platform: wifi_signal
+    id: wifi_signal_sensor
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+    # No longer drives a screen -- kept as an HA diagnostic entity, which is
+    # where signal strength is actually useful.
+  - platform: uptime
+    id: uptime_sensor
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+    # No longer drives a screen -- kept as an HA diagnostic entity.
+
+button:
+  - platform: restart
+    name: "Restart"
+    entity_category: config
+  - platform: safe_mode
+    name: "Safe Mode"
+    entity_category: config
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: diagnostic
+  - platform: wifi_info
+    ip_address:
+      name: WiFi IP Address
+      entity_category: diagnostic
+    ssid:
+      name: WiFi SSID
+      entity_category: diagnostic
+    mac_address:
+      name: WiFi MAC Address
+      entity_category: diagnostic

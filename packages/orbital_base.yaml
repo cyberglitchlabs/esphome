@@ -212,6 +212,7 @@ globals:
 
 packages:
   fonts: !include orbital_fonts.yaml
+  diagnostics: !include orbital_diagnostics.yaml
 
 # ---------------------------------------------------------------------------
 # Hardware: Displays (5x round GC9A01A, shared SPI bus)
@@ -814,9 +815,6 @@ interval:
 # ---------------------------------------------------------------------------
 
 binary_sensor:
-  - platform: status
-    name: "Status"
-    entity_category: diagnostic
   - platform: gpio
     id: button_left
     pin:
@@ -861,20 +859,6 @@ binary_sensor:
               id(autocycle_enabled) = !id(autocycle_enabled);
 
 sensor:
-  - platform: wifi_signal
-    id: wifi_signal_sensor
-    name: "WiFi Signal"
-    update_interval: 60s
-    entity_category: diagnostic
-    # No longer drives a screen -- kept as an HA diagnostic entity, which is
-    # where signal strength is actually useful.
-  - platform: uptime
-    id: uptime_sensor
-    name: "Uptime"
-    update_interval: 60s
-    entity_category: diagnostic
-    # No longer drives a screen -- kept as an HA diagnostic entity.
-
   - platform: homeassistant
     id: indoor_temp_num
     entity_id: ${orbital_indoor_entity}
@@ -923,14 +907,6 @@ sensor:
           text:
             format: "%.0f${orbital_weather_wind_unit}"
             args: [x]
-
-button:
-  - platform: restart
-    name: "Restart"
-    entity_category: config
-  - platform: safe_mode
-    name: "Safe Mode"
-    entity_category: config
 
 # ---------------------------------------------------------------------------
 # Home Assistant data: Weather / Presence / Custom sets
@@ -1186,20 +1162,6 @@ text_sensor:
               return std::string(buf);
             }
             return x.substr(0, 10);
-
-  - platform: version
-    name: "ESPHome Version"
-    entity_category: diagnostic
-  - platform: wifi_info
-    ip_address:
-      name: WiFi IP Address
-      entity_category: diagnostic
-    ssid:
-      name: WiFi SSID
-      entity_category: diagnostic
-    mac_address:
-      name: WiFi MAC Address
-      entity_category: diagnostic
 
 # ---------------------------------------------------------------------------
 # Hardware: onboard RGB status LED — diagnostic only, not user-controllable
