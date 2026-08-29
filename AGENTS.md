@@ -35,7 +35,19 @@ esphome config packages/s31_base.yaml
 
 # Compile (more thorough — requires toolchain)
 esphome compile tests/test_s31.yaml
+```
 
+**Note on multi-file packages:** not every package fits the single
+`packages/<name>_base.yaml` file convention above. `orbital` is composed of
+`packages/orbital_base.yaml` plus 8 sub-files (`orbital_hardware.yaml`,
+`orbital_fonts.yaml`, `orbital_screens_clock.yaml`, `orbital_screens_weather.yaml`,
+`orbital_screen_presence.yaml`, `orbital_screen_custom.yaml`,
+`orbital_navigation.yaml`, `orbital_diagnostics.yaml`). None of these validate
+standalone with `esphome config` — the package's `safe_mode` button entry
+requires a full device config with `safe_mode:` already declared — so the set
+only validates together via `tests/test_orbital.yaml`.
+
+```bash
 # Validate all CI-covered files
 esphome config tests/test_s31.yaml
 esphome config tests/test_ifan04.yaml

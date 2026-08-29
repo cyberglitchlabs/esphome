@@ -117,7 +117,7 @@ weather entity actually reports in. Check its `temperature_unit` and
 condition strings (`sunny`, `cloudy`, `partlycloudy`, `rainy`, etc.) to glyphs
 from a Material Design Icons font subset (`weather_icons`, fetched from
 jsDelivr's `@mdi/font` package — see the `font:` block in
-`orbital_base.yaml`). An unrecognized condition string falls back to a
+`packages/orbital_fonts.yaml`). An unrecognized condition string falls back to a
 "sunny-off" glyph.
 
 **Presence screens** show an icon that tracks state: a green house when the
@@ -135,7 +135,8 @@ containing duplicates — so the palette is fixed and slots may freely reuse the
 same icon. The baked palette covers gauge, flash, lightning-bolt, currency,
 battery, wifi, chart-line, clock, leaf, car, home-thermometer, water,
 printer-3d, server-network, bell and package. To use anything else, add its
-codepoint to the `font:` glyph list as well as setting the substitution.
+codepoint to the `font:` glyph list in `packages/orbital_fonts.yaml` as well
+as setting the substitution.
 
 **Dark theme:** all five displays use LVGL's `dark_mode` theme (dark
 backgrounds, light text) for readability. It's declared once, on `lvgl_1`

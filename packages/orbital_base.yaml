@@ -106,15 +106,17 @@ substitutions:
   # Custom set — point these at absolutely anything HA already tracks
   # (energy, stocks, whatever). Each slot takes four keys:
   #   _entity  the HA entity whose state is displayed
-  #   _icon    an MDI codepoint, baked into the font at build time (below)
+  #   _icon    an MDI codepoint, baked into the font at build time (in
+  #            orbital_fonts.yaml)
   #   _label   a short caption so the number means something
   #   _unit    appended to numeric states; leave "" for text states.
   #            Must not contain a literal % — it is used as a printf format.
   # _icon must be one of the codepoints baked into the weather_icons font
-  # below; slots may reuse the same icon. The palette there covers the common
-  # cases (gauge, flash, currency, battery, wifi, chart, clock, leaf, car,
-  # thermometer, water, printer, server, bell, package) — to use anything
-  # else, add its codepoint to that glyph list too.
+  # defined in orbital_fonts.yaml; slots may reuse the same icon. The palette
+  # there covers the common cases (gauge, flash, currency, battery, wifi,
+  # chart, clock, leaf, car, thermometer, water, printer, server, bell,
+  # package) — to use anything else, add its codepoint to that file's glyph
+  # list too.
   orbital_custom1_entity: sensor.custom_1
   orbital_custom1_icon: "\U000F029A"  # mdi:gauge
   orbital_custom1_label: "Custom 1"
@@ -200,6 +202,10 @@ sun:
   latitude: ${orbital_latitude}
   longitude: ${orbital_longitude}
 
+# `hardware:` must stay first: ESPHome processes `packages:` entries in
+# declaration order, and screens_clock/screens_weather/presence_1..5/
+# custom_1..5 below all `!extend` the `lvgl:` instances that
+# orbital_hardware.yaml declares. Don't reorder or alphabetize this map.
 packages:
   hardware: !include orbital_hardware.yaml
   fonts: !include orbital_fonts.yaml
