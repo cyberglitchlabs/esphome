@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------------------
+# Presence set: template, included once per display from orbital_base.yaml's
+# packages: block with vars: {index, entity, label}. Replaces what used to
+# be 5 hand-copied ~29-line blocks (one per person).
+# ---------------------------------------------------------------------------
+
+lvgl:
+  - id: !extend lvgl_${index}
+    pages:
+      - id: presence_${index}
+        widgets:
+          - label:
+              id: presence_icon_${index}
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x5A6472
+              text: "\U000F02D7"
+          - label:
+              id: presence_label_${index}
+              align: CENTER
+              y: 4
+              text: "-"
+          - label:
+              id: presence_name_${index}
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${label}"
+
+text_sensor:
+  - platform: homeassistant
+    id: presence_person${index}_ts
+    entity_id: ${entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: presence_label_${index}
+          text: !lambda |-
+            if (x == "home") return std::string("Home");
+            if (x == "not_home") return std::string("Away");
+            return x.substr(0, 10);
+      - lvgl.label.update:
+          id: presence_icon_${index}
+          text: !lambda |-
+            if (x == "home") return std::string("\U000F02DC");
+            if (x == "not_home") return std::string("\U000F0583");
+            return std::string("\U000F02D7");
+          text_color: !lambda |-
+            if (x == "home") return lv_color_make(52, 199, 89);
+            if (x == "not_home") return lv_color_make(255, 149, 0);
+            return lv_color_make(90, 100, 114);

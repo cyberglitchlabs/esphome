@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------
+# Custom set: template, included once per display from orbital_base.yaml's
+# packages: block with vars: {index, entity, label, icon, unit}. Replaces
+# what used to be 5 hand-copied ~29-line blocks.
+# ---------------------------------------------------------------------------
+
+lvgl:
+  - id: !extend lvgl_${index}
+    pages:
+      - id: custom_${index}
+        widgets:
+          - label:
+              id: custom_icon_${index}
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x00D9FF
+              text: "${icon}"
+          - label:
+              id: custom_label_${index}
+              align: CENTER
+              y: 4
+              text: "-"
+          - label:
+              id: custom_name_${index}
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "${label}"
+
+text_sensor:
+  - platform: homeassistant
+    id: custom_sensor${index}_ts
+    entity_id: ${entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: custom_label_${index}
+          text: !lambda |-
+            char *endptr;
+            float val = strtof(x.c_str(), &endptr);
+            if (endptr != x.c_str() && *endptr == '\0') {
+              char buf[24];
+              snprintf(buf, sizeof(buf), "%.1f${unit}", val);
+              return std::string(buf);
+            }
+            return x.substr(0, 10);

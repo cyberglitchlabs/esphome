@@ -1,0 +1,123 @@
+# ---------------------------------------------------------------------------
+# Hardware: Displays (5x round GC9A01A, shared SPI bus)
+# ---------------------------------------------------------------------------
+
+spi:
+  id: spi_bus
+  clk_pin: ${orbital_sclk_pin}
+  mosi_pin: ${orbital_mosi_pin}
+
+display:
+  - platform: mipi_spi
+    model: GC9A01A
+    id: display_1
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs1_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    reset_pin: ${orbital_reset_pin}
+    invert_colors: true
+    auto_clear_enabled: false
+    update_interval: never  # LVGL drives redraws; no polling needed
+  - platform: mipi_spi
+    model: GC9A01A
+    id: display_2
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs2_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: false
+    update_interval: never
+  - platform: mipi_spi
+    model: GC9A01A
+    id: display_3
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs3_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: false
+    update_interval: never
+  - platform: mipi_spi
+    model: GC9A01A
+    id: display_4
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs4_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: false
+    update_interval: never
+  - platform: mipi_spi
+    model: GC9A01A
+    id: display_5
+    spi_id: spi_bus
+    cs_pin: ${orbital_cs5_pin}
+    dc_pin:
+      number: ${orbital_dc_pin}
+      allow_other_uses: true
+    invert_colors: true
+    auto_clear_enabled: false
+    update_interval: never
+
+# ---------------------------------------------------------------------------
+# LVGL: one instance per display. Base declaration only -- no pages: key
+# here. orbital_screens_clock.yaml, orbital_screens_weather.yaml,
+# orbital_screen_presence.yaml, and orbital_screen_custom.yaml each
+# `!extend` these instances to add their one page apiece. Those files'
+# entries in orbital_base.yaml's `packages:` block must come after this
+# file's `hardware` entry -- ESPHome processes packages in declaration
+# order, and `!extend` needs something to extend.
+# ---------------------------------------------------------------------------
+
+lvgl:
+  - id: lvgl_1
+    displays:
+      - display_1
+    buffer_size: 10%
+    default_font: montserrat_28
+    # dark_mode applies globally across all 5 LVGL instances even though it's
+    # only declared here — ESPHome only allows `theme:` on one instance when
+    # multiple LVGL instances are in play (it's one shared define, not
+    # per-instance), so don't copy this block onto lvgl_2..lvgl_5.
+    theme:
+      dark_mode: true
+  - id: lvgl_2
+    displays:
+      - display_2
+    buffer_size: 10%
+    default_font: montserrat_28
+  - id: lvgl_3
+    displays:
+      - display_3
+    buffer_size: 10%
+    default_font: montserrat_28
+  - id: lvgl_4
+    displays:
+      - display_4
+    buffer_size: 10%
+    default_font: montserrat_28
+  - id: lvgl_5
+    displays:
+      - display_5
+    buffer_size: 10%
+    default_font: montserrat_28
+
+# ---------------------------------------------------------------------------
+# Hardware: onboard RGB status LED — diagnostic only, not user-controllable
+# ---------------------------------------------------------------------------
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: status_light
+    pin: ${orbital_led_pin}
+    num_leds: 1
+    chipset: ws2812
+    rgb_order: GRB
+    internal: true
+    default_transition_length: 0s

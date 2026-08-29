@@ -1,0 +1,161 @@
+# ---------------------------------------------------------------------------
+# Weather set: screens 1/2/3/4 all read from a SINGLE HA weather entity
+# (temperature, humidity, wind_speed off its attributes; condition off its
+# plain state). Screen 5 is a precomputed forecast string.
+# ---------------------------------------------------------------------------
+
+lvgl:
+  - id: !extend lvgl_1
+    pages:
+      - id: weather_1
+        widgets:
+          - label:
+              id: weather_icon_1
+              align: CENTER
+              y: -34
+              text_font: weather_icons
+              text_color: 0xFF7A33
+              text: "\U000F050F"
+          - label:
+              id: weather_label_1
+              align: CENTER
+              y: 18
+              text: "-"
+
+  - id: !extend lvgl_2
+    pages:
+      - id: weather_2
+        widgets:
+          - label:
+              id: weather_icon_2
+              align: CENTER
+              y: -34
+              text_font: weather_icons
+              text_color: 0x00B4D8
+              text: "\U000F058E"
+          - label:
+              id: weather_label_2
+              align: CENTER
+              y: 18
+              text: "-"
+
+  - id: !extend lvgl_3
+    pages:
+      - id: weather_3
+        widgets:
+          - label:
+              id: weather_label_3
+              align: CENTER
+              text_font: weather_icons
+              text: ""
+
+  - id: !extend lvgl_4
+    pages:
+      - id: weather_4
+        widgets:
+          - label:
+              id: weather_icon_4
+              align: CENTER
+              y: -34
+              text_font: weather_icons
+              text_color: 0x9AA5B1
+              text: "\U000F059D"
+          - label:
+              id: weather_label_4
+              align: CENTER
+              y: 18
+              text: "-"
+
+  - id: !extend lvgl_5
+    pages:
+      - id: weather_5
+        widgets:
+          - label:
+              id: weather_icon_5
+              align: CENTER
+              y: -34
+              text_font: weather_icons
+              text_color: 0x8B7BE8
+              text: "\U000F0E17"
+          - label:
+              id: weather_label_5
+              align: CENTER
+              y: 18
+              text: "-"
+
+# Weather numerics, read as attributes off the single weather entity. Using
+# the numeric platform (rather than text_sensor) means x is a float, so the
+# value can be rounded for display — HA's raw state string would give us
+# "8.780000000000001" for wind speed.
+sensor:
+  - platform: homeassistant
+    id: weather_temp_num
+    entity_id: ${orbital_weather_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_1
+          text:
+            format: "%.0f${orbital_weather_temp_unit}"
+            args: [x]
+  - platform: homeassistant
+    id: weather_humidity_num
+    entity_id: ${orbital_weather_entity}
+    attribute: humidity
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_2
+          text:
+            format: "%.0f%%"
+            args: [x]
+  - platform: homeassistant
+    id: weather_wind_num
+    entity_id: ${orbital_weather_entity}
+    attribute: wind_speed
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_4
+          text:
+            format: "%.0f${orbital_weather_wind_unit}"
+            args: [x]
+
+text_sensor:
+  # Screen 3: the weather entity's own state, mapped to a condition glyph.
+  - platform: homeassistant
+    id: weather_condition_ts
+    entity_id: ${orbital_weather_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_3
+          text: !lambda |-
+            if (x == "clear-night") return std::string("\U000F0594");
+            if (x == "cloudy") return std::string("\U000F0590");
+            if (x == "fog") return std::string("\U000F0591");
+            if (x == "hail") return std::string("\U000F0592");
+            if (x == "lightning") return std::string("\U000F0593");
+            if (x == "lightning-rainy") return std::string("\U000F067E");
+            if (x == "partlycloudy") return std::string("\U000F0595");
+            if (x == "pouring") return std::string("\U000F0596");
+            if (x == "rainy") return std::string("\U000F0597");
+            if (x == "snowy") return std::string("\U000F0598");
+            if (x == "snowy-rainy") return std::string("\U000F067F");
+            if (x == "sunny") return std::string("\U000F0599");
+            if (x == "windy") return std::string("\U000F059D");
+            if (x == "windy-variant") return std::string("\U000F059E");
+            if (x == "exceptional") return std::string("\U000F0F2F");
+            return std::string("\U000F14E4"); // unrecognized condition
+
+  # Screen 5: a short forecast string precomputed in HA. Truncated because the
+  # round display fits roughly ten characters at montserrat_28.
+  - platform: homeassistant
+    id: weather_forecast_ts
+    entity_id: ${orbital_weather_forecast_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: weather_label_5
+          text: !lambda "return x.substr(0, 10);"

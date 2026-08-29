@@ -1,0 +1,311 @@
+# ---------------------------------------------------------------------------
+# Clock set: analog clock (display 1), calendar (display 2), waste pickup
+# (display 3), sunrise/sunset (display 4), indoor temperature (display 5).
+# Each display shows genuinely different content here, so unlike Presence
+# and Custom this set is not a template -- five distinct pages.
+# ---------------------------------------------------------------------------
+
+lvgl:
+  - id: !extend lvgl_1
+    pages:
+      - id: clock_1
+        widgets:
+          - obj:
+              width: 240
+              height: 240
+              align: CENTER
+              pad_all: 0
+              border_width: 0
+              bg_color: 0x000000
+              widgets:
+                - meter:
+                    id: clock_meter_1
+                    height: 220
+                    width: 220
+                    align: CENTER
+                    bg_opa: TRANSP
+                    border_width: 0
+                    scales:
+                      - range_from: 0 # minutes scale (outer ring of ticks)
+                        range_to: 60
+                        angle_range: 360
+                        rotation: 270
+                        ticks:
+                          width: 1
+                          count: 61
+                          length: 6
+                          color: 0x444444
+                        indicators:
+                          - line:
+                              id: minute_hand
+                              width: 3
+                              color: 0x00D9FF
+                              length: 90%
+                              value: 0
+                      - range_from: 1 # hour scale (numbered 1-12 major ticks)
+                        range_to: 12
+                        angle_range: 330
+                        rotation: 300
+                        ticks:
+                          width: 1
+                          count: 12
+                          length: 1
+                          major:
+                            stride: 1
+                            width: 3
+                            length: 14
+                            color: 0xAAAAAA
+                            label_gap: 10
+                      - range_from: 0 # hi-res hours scale, drives the hour hand
+                        range_to: 720
+                        angle_range: 360
+                        rotation: 270
+                        indicators:
+                          - line:
+                              id: hour_hand
+                              width: 5
+                              color: 0xFF9500
+                              length: 65%
+                              value: 0
+
+  - id: !extend lvgl_2
+    pages:
+      - id: clock_2
+        widgets:
+          # Month and weekday are content here, not captions, so they use
+          # montserrat_28 rather than the montserrat_14 used for captions
+          # elsewhere. 28 is already compiled in as default_font, so this
+          # costs no flash -- a new size would have.
+          #
+          # Vertical budget on the 240px circle: month spans -70..-42, the
+          # day number -32..+16, weekday +30..+58. The widest weekday,
+          # WEDNESDAY, is ~144px at this size; the circle is 210px wide at
+          # y=+58, so it clears the rim.
+          - label:
+              id: clock_month_2
+              align: CENTER
+              y: -56
+              text_font: montserrat_28
+              text_color: 0xB6BEC9
+              text: "---"
+          - label:
+              id: clock_date_2
+              align: CENTER
+              y: -8
+              text_font: montserrat_48
+              text: "00"
+          - label:
+              id: clock_dow_2
+              align: CENTER
+              y: 44
+              text_font: montserrat_28
+              text_color: 0xB6BEC9
+              text: "---"
+
+  - id: !extend lvgl_3
+    pages:
+      - id: clock_3
+        widgets:
+          # Both icons are always present in the same place; only the recycle
+          # symbol's colour changes. Position never moving is what makes it
+          # readable at a glance instead of something you have to parse.
+          - label:
+              id: waste_trash_3
+              align: CENTER
+              x: -34
+              y: -30
+              text_font: weather_icons
+              text_color: 0xC9D1D9
+              text: "\U000F0A79"
+          - label:
+              id: waste_recycle_3
+              align: CENTER
+              x: 34
+              y: -30
+              text_font: weather_icons
+              text_color: 0x22272E
+              text: "\U000F044C"
+          - label:
+              id: waste_when_3
+              align: CENTER
+              y: 38
+              text: "-"
+
+  - id: !extend lvgl_4
+    pages:
+      - id: clock_4
+        widgets:
+          - label:
+              id: sun_icon_4
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0xFFC64B
+              text: "\U000F059C"
+          - label:
+              id: sun_time_4
+              align: CENTER
+              y: 4
+              text: "--:--"
+          - label:
+              id: sun_label_4
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "---"
+
+  - id: !extend lvgl_5
+    pages:
+      - id: clock_5
+        widgets:
+          - label:
+              id: indoor_icon_5
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0xFF7A33
+              text: "\U000F050F"
+          - label:
+              id: indoor_label_5
+              align: CENTER
+              y: 4
+              text: "-"
+          - label:
+              id: indoor_name_5
+              align: CENTER
+              y: 38
+              text_font: montserrat_14
+              text_color: 0x6B7380
+              text: "INDOOR"
+
+interval:
+  - interval: 1s
+    then:
+      - lvgl.indicator.update:
+          id: minute_hand
+          value: !lambda "return id(orbital_time).now().minute;"
+      - lvgl.indicator.update:
+          id: hour_hand
+          value: !lambda |-
+            auto t = id(orbital_time).now();
+            return (t.hour % 12) * 60 + t.minute;
+  - interval: 60s
+    then:
+      # Calendar page. strftime's day-of-month is zero-padded (%d) or
+      # space-padded (%e) and the no-pad form is a GNU extension, so the
+      # number comes from the field directly instead.
+      - lvgl.label.update:
+          id: clock_date_2
+          text: !lambda |-
+            char buf[4];
+            snprintf(buf, sizeof(buf), "%d", id(orbital_time).now().day_of_month);
+            return std::string(buf);
+      - lvgl.label.update:
+          id: clock_month_2
+          text: !lambda |-
+            std::string s = id(orbital_time).now().strftime("%b");
+            for (auto &c : s) c = toupper(c);
+            return s;
+      - lvgl.label.update:
+          id: clock_dow_2
+          text: !lambda |-
+            std::string s = id(orbital_time).now().strftime("%A");
+            for (auto &c : s) c = toupper(c);
+            return s;
+      # Sunrise/sunset: show whichever comes next.
+      - script.execute: update_sun_screen
+
+sensor:
+  - platform: homeassistant
+    id: indoor_temp_num
+    entity_id: ${orbital_indoor_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: indoor_label_5
+          text:
+            format: "%.1f${orbital_indoor_unit}"
+            args: [x]
+
+text_sensor:
+  # Clock screen 3: the waste calendar's next event. `description` carries
+  # the combined text for the whole pickup; `message` would give only the
+  # first of several same-day events.
+  - platform: homeassistant
+    id: waste_desc_ts
+    entity_id: ${orbital_waste_calendar_entity}
+    attribute: description
+    internal: true
+    on_value:
+      - script.execute: update_waste_screen
+  - platform: homeassistant
+    id: waste_start_ts
+    entity_id: ${orbital_waste_calendar_entity}
+    attribute: start_time
+    internal: true
+    on_value:
+      - script.execute: update_waste_screen
+
+script:
+  - id: update_sun_screen
+    mode: restart
+    then:
+      - lambda: |-
+          // -0.833 deg is the standard refraction-corrected horizon.
+          auto sunrise = id(orbital_sun).sunrise(-0.833);
+          auto sunset = id(orbital_sun).sunset(-0.833);
+          const bool day = id(orbital_sun).is_above_horizon();
+          auto next = day ? sunset : sunrise;
+          if (!next.has_value())
+            return;   // no fix yet (clock not synced, or polar day/night)
+          lv_label_set_text(id(sun_time_4), next->strftime("%H:%M").c_str());
+          lv_label_set_text(id(sun_label_4), day ? "SUNSET" : "SUNRISE");
+          lv_label_set_text(id(sun_icon_4),
+                            day ? "\U000F059B" : "\U000F059C");
+
+  - id: update_waste_screen
+    mode: restart
+    then:
+      - lambda: |-
+          // Recycling is the only stream that varies week to week here -
+          // garbage and yard waste ride along on every pickup - so the
+          // recycle glyph lights up and everything else stays put.
+          std::string d = id(waste_desc_ts).state;
+          for (auto &c : d) c = tolower(c);
+          const bool recycling = d.find("recycl") != std::string::npos;
+          lv_obj_set_style_text_color(
+              id(waste_recycle_3),
+              recycling ? lv_color_make(52, 199, 89) : lv_color_make(34, 39, 53),
+              LV_PART_MAIN);
+
+          // "2026-08-25 00:00:00" -> TODAY / TOMORROW / a weekday.
+          ESPTime pickup{};
+          if (!ESPTime::strptime(id(waste_start_ts).state, pickup)) {
+            lv_label_set_text(id(waste_when_3), "-");
+            return;
+          }
+          // strptime fills the calendar fields but not day_of_week, so round
+          // trip through the epoch to get a fully populated struct.
+          pickup.recalc_timestamp_utc(false);
+          pickup = ESPTime::from_epoch_utc(pickup.timestamp);
+
+          auto now = id(orbital_time).now();
+          auto tomorrow = now;
+          tomorrow.increment_day();
+
+          const char *when;
+          if (pickup.year == now.year && pickup.month == now.month &&
+              pickup.day_of_month == now.day_of_month) {
+            when = "TODAY";
+          } else if (pickup.year == tomorrow.year &&
+                     pickup.month == tomorrow.month &&
+                     pickup.day_of_month == tomorrow.day_of_month) {
+            when = "TOMORROW";
+          } else {
+            static const char *const DOW[] = {"SUN", "MON", "TUE", "WED",
+                                              "THU", "FRI", "SAT"};
+            const int idx = pickup.day_of_week - 1;   // sunday == 1
+            when = (idx >= 0 && idx < 7) ? DOW[idx] : "-";
+          }
+          lv_label_set_text(id(waste_when_3), when);
