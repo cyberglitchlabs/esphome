@@ -210,9 +210,6 @@ globals:
     restore_value: false
     initial_value: "false"
 
-web_server:
-  port: 80
-
 # ---------------------------------------------------------------------------
 # Hardware: Displays (5x round GC9A01A, shared SPI bus)
 # ---------------------------------------------------------------------------
