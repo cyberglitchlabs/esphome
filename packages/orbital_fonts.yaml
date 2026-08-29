@@ -1,0 +1,72 @@
+# ---------------------------------------------------------------------------
+# Fonts: Material Design Icons, subset to the weather condition glyphs HA's
+# weather integration actually reports (clear-night/cloudy/exceptional/fog/
+# hail/lightning/lightning-rainy/partlycloudy/pouring/rainy/snowy/
+# snowy-rainy/sunny/windy/windy-variant, plus a sunny-off fallback for an
+# unrecognized condition string). Fetched from jsDelivr (pinned to a specific
+# @mdi/font release, not @latest) rather than committed locally — font file:
+# paths resolve relative to whatever top-level config includes this package,
+# so a local path would need duplicating into every consumer's directory.
+# Source: https://github.com/Templarian/MaterialDesign-Webfont (SIL OFL 1.1).
+# ---------------------------------------------------------------------------
+
+font:
+  - file: "https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/fonts/materialdesignicons-webfont.ttf"
+    id: weather_icons
+    size: 64
+    bpp: 4
+    glyphs: [
+      "\U000F0594", # clear-night
+      "\U000F0590", # cloudy
+      "\U000F0F2F", # exceptional
+      "\U000F0591", # fog
+      "\U000F0592", # hail
+      "\U000F0593", # lightning
+      "\U000F067E", # lightning-rainy
+      "\U000F0595", # partlycloudy
+      "\U000F0596", # pouring
+      "\U000F0597", # rainy
+      "\U000F0598", # snowy
+      "\U000F067F", # snowy-rainy
+      "\U000F0599", # sunny
+      "\U000F059D", # windy
+      "\U000F059E", # windy-variant
+      "\U000F14E4", # sunny-off (fallback for unknown conditions)
+      # Measurement icons for the weather screens that show a number
+      "\U000F050F", # thermometer  -> temperature
+      "\U000F058E", # water-percent -> humidity
+      "\U000F0E17", # calendar-month -> forecast
+      # Clock-set icons
+      "\U000F0A79", # trash-can     -> waste pickup
+      "\U000F044C", # recycle       -> recycling included this week
+      "\U000F059C", # weather-sunset-up   -> next event is sunrise
+      "\U000F059B", # weather-sunset-down -> next event is sunset
+      # Presence state icons
+      "\U000F02DC", # home        -> person is home
+      "\U000F0583", # walk        -> person is away
+      "\U000F02D7", # help-circle -> unknown / unavailable
+      # General-purpose palette for the custom slots. This list is static on
+      # purpose: ESPHome rejects a font whose glyph list contains duplicates,
+      # so interpolating the five orbital_custom*_icon substitutions here
+      # would break as soon as two slots picked the same icon (two power
+      # readings both wanting mdi:flash, say). Baking a fixed palette instead
+      # means a substitution only selects a glyph that is already present, and
+      # slots may freely repeat. To use an icon that is not listed, add its
+      # codepoint here as well as setting the substitution.
+      "\U000F029A", # gauge
+      "\U000F0241", # flash
+      "\U000F140B", # lightning-bolt
+      "\U000F01C1", # currency-usd
+      "\U000F0079", # battery
+      "\U000F05A9", # wifi
+      "\U000F012A", # chart-line
+      "\U000F0150", # clock-outline
+      "\U000F032A", # leaf
+      "\U000F010B", # car
+      "\U000F0F54", # home-thermometer
+      "\U000F058C", # water
+      "\U000F042B", # printer-3d
+      "\U000F048D", # server-network
+      "\U000F009A", # bell
+      "\U000F03D6", # package-variant
+      ]
