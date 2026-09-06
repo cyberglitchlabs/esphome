@@ -202,10 +202,6 @@ sun:
   latitude: ${orbital_latitude}
   longitude: ${orbital_longitude}
 
-# `hardware:` must stay first: ESPHome processes `packages:` entries in
-# declaration order, and screens_clock/screens_weather/presence_1..5/
-# custom_1..5 below all `!extend` the `lvgl:` instances that
-# orbital_hardware.yaml declares. Don't reorder or alphabetize this map.
 packages:
   hardware: !include orbital_hardware.yaml
   fonts: !include orbital_fonts.yaml

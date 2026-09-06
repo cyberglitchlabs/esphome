@@ -14,6 +14,7 @@
 
 - External consumer contract is unchanged: `examples/orbital_example.yaml` and `tests/test_orbital.yaml` must keep working with `files: [packages/orbital_base.yaml]` and no other changes.
 - In `orbital_base.yaml`'s `packages:` mapping, `hardware:` (which declares the base `lvgl:` instances) must appear before `screens_clock:`, `screens_weather:`, `presence_*:`, and `custom_*:` (which each `!extend` those instances) — ESPHome processes `packages:` entries in declaration order.
+  - **Correction (2026-09-06):** empirically disproven post-merge. Moving `hardware:` to the end of the `packages:` map and re-running `esphome config tests/test_orbital.yaml` on ESPHome 2026.8.2 produced byte-identical resolved output (sorted-line diff and ordered LVGL page/instance order both empty). `packages:` declaration order does not affect `!extend` resolution on this version. The corresponding comment in `orbital_base.yaml` has been removed; this constraint no longer applies.
 - Baseline firmware size is 1,337,392 bytes (`firmware.factory.bin` from `esphome compile tests/test_orbital.yaml`). Final size must be equal or smaller — never larger.
 - This is a pure refactor: no new features, no behavior change, except removing `web_server:` (confirmed unused).
 - Clock and Weather sets are NOT templated — each display shows genuinely different content. Only Presence and Custom use the `!include`+`vars` template pattern.
