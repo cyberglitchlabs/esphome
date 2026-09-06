@@ -69,4 +69,7 @@ font:
       "\U000F048D", # server-network
       "\U000F009A", # bell
       "\U000F03D6", # package-variant
+      # Plane-overhead icons (selected by aircraft_category)
+      "\U000F001D", # airplane
+      "\U000F0AC2", # helicopter
       ]
