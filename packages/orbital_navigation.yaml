@@ -56,13 +56,42 @@ binary_sensor:
         then:
           - lambda: |-
               id(autocycle_enabled) = !id(autocycle_enabled);
+  # Plane-overhead popup. Deliberately does not touch current_set: on_press
+  # shows the plane pages directly; on_release just re-invokes
+  # show_current_set, which restores whatever current_set still says since
+  # this interrupt never changed it. Button presses are NOT guarded against
+  # this -- a button press always wins over the popup.
+  - platform: homeassistant
+    id: plane_overhead
+    entity_id: ${orbital_plane_overhead_entity}
+    internal: true
+    on_press:
+      - lvgl.page.show:
+          id: plane_1
+          lvgl_id: lvgl_1
+      - lvgl.page.show:
+          id: plane_2
+          lvgl_id: lvgl_2
+      - lvgl.page.show:
+          id: plane_3
+          lvgl_id: lvgl_3
+      - lvgl.page.show:
+          id: plane_4
+          lvgl_id: lvgl_4
+      - lvgl.page.show:
+          id: plane_5
+          lvgl_id: lvgl_5
+    on_release:
+      - script.execute: show_current_set
 
 interval:
   - interval: ${orbital_autocycle_interval}
     then:
       - if:
           condition:
-            lambda: "return id(autocycle_enabled);"
+            # Guarded so autocycle doesn't yank the plane pages away
+            # mid-flyover -- it just skips its tick while the popup is up.
+            lambda: "return id(autocycle_enabled) && !id(plane_overhead).state;"
           then:
             - lambda: |-
                 id(current_set) = (id(current_set) + 1) % 4;
