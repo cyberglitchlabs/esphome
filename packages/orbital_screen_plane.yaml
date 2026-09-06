@@ -1,0 +1,151 @@
+# ---------------------------------------------------------------------------
+# Plane-overhead popup: 5 facets of the single nearest airborne aircraft,
+# sourced from orbital_plane_entity (identity as state, aircraft_model/
+# airline/route/altitude as attributes). Included once from orbital_base.yaml's
+# packages: block -- these are 5 facets of ONE entity, like the Weather set,
+# not a per-slot template like Presence/Custom. The popup interrupt itself
+# (showing plane_1..5, restoring afterward) lives in orbital_navigation.yaml,
+# not here -- this file only owns the pages and their content bindings.
+# ---------------------------------------------------------------------------
+
+lvgl:
+  - id: !extend lvgl_1
+    pages:
+      - id: plane_1
+        widgets:
+          - label:
+              id: plane_icon_1
+              align: CENTER
+              y: -44
+              text_font: weather_icons
+              text_color: 0x00D9FF
+              text: "\U000F001D"
+          - label:
+              id: plane_label_1
+              align: CENTER
+              y: 4
+              text: "-"
+
+  - id: !extend lvgl_2
+    pages:
+      - id: plane_2
+        widgets:
+          # aircraft_model can run long ("Mitsubishi CRJ-900LR") -- wrapped
+          # at montserrat_14 (already compiled in for Presence/Custom
+          # captions, so this costs no extra flash) rather than truncated.
+          - label:
+              id: plane_label_2
+              align: CENTER
+              width: 190
+              long_mode: WRAP
+              text_align: CENTER
+              text_font: montserrat_14
+              text: "-"
+
+  - id: !extend lvgl_3
+    pages:
+      - id: plane_3
+        widgets:
+          # airline/operator can also run long ("Thunderbird Aviation").
+          - label:
+              id: plane_label_3
+              align: CENTER
+              width: 190
+              long_mode: WRAP
+              text_align: CENTER
+              text_font: montserrat_14
+              text: "-"
+
+  - id: !extend lvgl_4
+    pages:
+      - id: plane_4
+        widgets:
+          - label:
+              id: plane_label_4
+              align: CENTER
+              text: "-"
+
+  - id: !extend lvgl_5
+    pages:
+      - id: plane_5
+        widgets:
+          - label:
+              id: plane_label_5
+              align: CENTER
+              text: "-"
+
+text_sensor:
+  # Screen 1: identity (flight_number if present, else callsign/tail
+  # number -- orbital_plane_entity's own state already resolves that
+  # fallback in HA) and its icon, chosen from the aircraft_category
+  # attribute.
+  - platform: homeassistant
+    id: plane_identity_ts
+    entity_id: ${orbital_plane_entity}
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: plane_label_1
+          text: !lambda "return x.substr(0, 10);"
+  - platform: homeassistant
+    id: plane_category_ts
+    entity_id: ${orbital_plane_entity}
+    attribute: aircraft_category
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: plane_icon_1
+          text: !lambda |-
+            if (x == "Airplane") return std::string("\U000F001D");
+            if (x == "Helicopter") return std::string("\U000F0AC2");
+            return std::string("\U000F001D"); // unrecognized category
+
+  # Screen 2: aircraft model.
+  - platform: homeassistant
+    id: plane_model_ts
+    entity_id: ${orbital_plane_entity}
+    attribute: aircraft_model
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: plane_label_2
+          text: !lambda "return x;"
+
+  # Screen 3: operator/airline.
+  - platform: homeassistant
+    id: plane_airline_ts
+    entity_id: ${orbital_plane_entity}
+    attribute: airline
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: plane_label_3
+          text: !lambda "return x;"
+
+  # Screen 4: route, precomputed as one "ORIGIN → DEST" string in HA so
+  # ESPHome doesn't need to combine two attributes with a null fallback.
+  - platform: homeassistant
+    id: plane_route_ts
+    entity_id: ${orbital_plane_entity}
+    attribute: route
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: plane_label_4
+          text: !lambda "return x;"
+
+sensor:
+  # Screen 5: altitude, read as a numeric attribute (not text_sensor) so it
+  # can be formatted -- same technique as the Weather set's temperature/
+  # humidity/wind_speed attributes.
+  - platform: homeassistant
+    id: plane_altitude_num
+    entity_id: ${orbital_plane_entity}
+    attribute: altitude
+    internal: true
+    on_value:
+      - lvgl.label.update:
+          id: plane_label_5
+          text:
+            format: "%.0fft"
+            args: [x]
