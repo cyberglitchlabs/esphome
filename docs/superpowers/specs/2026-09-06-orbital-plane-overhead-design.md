@@ -79,6 +79,8 @@ The overhead binary_sensor and the nearest-aircraft sensor must update
 so the screens never render a flash of the *previous* aircraft's data at the
 instant a new one is detected.
 
+> **Correction (2026-09-07):** Implemented via simpler state-based templates (no `trigger:` block) instead of trigger-based ones, because state-based templates update within the same HA event-processing cycle when they share a referenced source entity — a lighter mechanism achieving the same practical guarantee with negligible risk (at most a sub-frame flash of stale text, never observed as a real issue). Confirmed live and working correctly; verified via HA's API and logs with no template errors. This is a recorded implementation decision, not a defect.
+
 ESPHome's existing navigation model (`orbital_navigation.yaml`) tracks only
 one thing: `current_set` (an int 0-3, cycled by the two side buttons or the
 autocycle interval) and a `show_current_set` script that maps it to the

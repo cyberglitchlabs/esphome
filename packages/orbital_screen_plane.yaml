@@ -75,10 +75,9 @@ lvgl:
               text: "-"
 
 text_sensor:
-  # Screen 1: identity (flight_number if present, else callsign/tail
+  # Screen 1: identity text (flight_number if present, else callsign/tail
   # number -- orbital_plane_entity's own state already resolves that
-  # fallback in HA) and its icon, chosen from the aircraft_category
-  # attribute.
+  # fallback in HA), truncated to 10 characters.
   - platform: homeassistant
     id: plane_identity_ts
     entity_id: ${orbital_plane_entity}
@@ -87,6 +86,7 @@ text_sensor:
       - lvgl.label.update:
           id: plane_label_1
           text: !lambda "return x.substr(0, 10);"
+  # Screen 1: icon selection, chosen from aircraft_category attribute.
   - platform: homeassistant
     id: plane_category_ts
     entity_id: ${orbital_plane_entity}

@@ -534,22 +534,22 @@ template:
         attributes:
           aircraft_model: >
             {% set flights = state_attr('sensor.flightradar24_current_in_area', 'flights') | default([], true) | selectattr('on_ground', 'equalto', 0) | list %}
-            {{ (flights | sort(attribute='distance') | first).aircraft_model if flights | count > 0 else '—' }}
+            {{ (flights | sort(attribute='distance') | first).aircraft_model if flights | count > 0 else '?' }}
           airline: >
             {% set flights = state_attr('sensor.flightradar24_current_in_area', 'flights') | default([], true) | selectattr('on_ground', 'equalto', 0) | list %}
             {% if flights | count == 0 %}
-              —
+              ?
             {% else %}
               {% set f = flights | sort(attribute='distance') | first %}
-              {{ f.airline or '—' }}
+              {{ f.airline or '?' }}
             {% endif %}
           route: >
             {% set flights = state_attr('sensor.flightradar24_current_in_area', 'flights') | default([], true) | selectattr('on_ground', 'equalto', 0) | list %}
             {% if flights | count == 0 %}
-              —
+              ?
             {% else %}
               {% set f = flights | sort(attribute='distance') | first %}
-              {{ f.airport_origin_code_iata or '—' }} → {{ f.airport_destination_code_iata or '—' }}
+              {{ f.airport_origin_code_iata or '?' }} -> {{ f.airport_destination_code_iata or '?' }}
             {% endif %}
           altitude: >
             {% set flights = state_attr('sensor.flightradar24_current_in_area', 'flights') | default([], true) | selectattr('on_ground', 'equalto', 0) | list %}
