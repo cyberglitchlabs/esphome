@@ -118,6 +118,6 @@ light:
     pin: ${orbital_led_pin}
     num_leds: 1
     chipset: ws2812
-    rgb_order: GRB
+    channel_colors: GRB
     internal: true
     default_transition_length: 0s

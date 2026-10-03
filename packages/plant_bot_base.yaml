@@ -64,7 +64,7 @@ output:
 # WS2812B NeoPixel — 1 LED on GPIO10 (RMT-driven, esp-idf native)
 light:
   - platform: esp32_rmt_led_strip
-    rgb_order: GRB
+    channel_colors: GRB
     chipset: WS2812
     pin: GPIO10
     num_leds: 1
