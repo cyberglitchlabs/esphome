@@ -19,7 +19,7 @@ wifi:
 
 api:
   encryption:
-    key: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    key: "XtIOOvI9y8J1l520Nx7S4fO2NlLxhnHEHklv3DRlgi8="  # throwaway test key, not a real secret
 
 ota:
   - platform: esphome
