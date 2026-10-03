@@ -51,6 +51,7 @@ only validates together via `tests/test_orbital.yaml`.
 # Validate all CI-covered files
 esphome config tests/test_s31.yaml
 esphome config tests/test_ifan04.yaml
+esphome config tests/test_ifan04_secure.yaml
 esphome config tests/test_owon_xdm.yaml
 esphome config tests/test_wopr.yaml
 esphome config tests/test_rv_tv.yaml

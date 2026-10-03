@@ -18,6 +18,7 @@ jobs:
         file:
           - tests/test_s31.yaml
           - tests/test_ifan04.yaml
+          - tests/test_ifan04_secure.yaml
           - tests/test_owon_xdm.yaml
           - tests/test_wopr.yaml
           - tests/test_rv_tv.yaml

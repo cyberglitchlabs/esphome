@@ -1,0 +1,30 @@
+# Mirrors the hardened settings from examples/ifan04_example.yaml (encrypted API,
+# encrypted OTA, fallback AP password) against the in-repo package, with dummy
+# literals instead of !secret so CI needs no secrets.yaml.
+# Encrypted OTA requires ESPHome 2026.9.0 or newer.
+substitutions:
+  name: "test-ifan04-secure"
+  friendly_name: "Test iFan04 Secure"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+wifi:
+  ssid: "TestSSID"
+  password: "TestPassword"
+  ap:
+    ssid: "${friendly_name} Fallback"
+    password: "TestFallbackPassword"
+
+api:
+  encryption:
+    key: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+
+ota:
+  - platform: esphome
+    encryption:
+  - platform: web_server
+
+packages:
+  base: !include ../packages/ifan04_base.yaml

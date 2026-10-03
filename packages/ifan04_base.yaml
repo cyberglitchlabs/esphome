@@ -21,6 +21,7 @@
 # - Buzzer feedback with morse code patterns
 # - Optional fan startup boost
 # - Physical button support
+# - RC Command event entity (remote button presses) for Home Assistant automations
 
 substitutions:
   name: "ifan04"
@@ -44,7 +45,7 @@ esphome:
   friendly_name: "${friendly_name}"
   project:
     name: "cyberglitchlabs.sonoff_ifan04"
-    version: "1.0.0"
+    version: "1.1.0"
   platformio_options:
     board_build.flash_size: 2MB
   on_boot:
@@ -55,17 +56,16 @@ esphome:
             id: switches_initialized
             value: "true"
 
+# Pinned to commit SHAs for reproducible builds; bump deliberately after reviewing upstream.
 external_components:
   - source:
       type: git
       url: https://github.com/rh1rich/esphome-ifan-remote
-      ref: main
-    refresh: 7d
+      ref: 363cadbb85fe0c04874564ee1d42f70fd5f21fcc
   - source:
       type: git
       url: https://github.com/rh1rich/esphome-morse-code
-      ref: main
-    refresh: 7d
+      ref: fa780212ff4c0b6e2d2a4b70939e89b2a9ff6df5
 
 esp8266:
   board: esp8285
@@ -258,7 +258,7 @@ sensor:
       - lambda: |-
           return min(max(2 * (x + 100.0), 0.0), 100.0);
     unit_of_measurement: "%"
-    device_class: 'signal_strength'
+    device_class: ""  # RSSI percent; HA's signal_strength class only accepts dB/dBm
 
 binary_sensor:
   - platform: gpio
@@ -269,26 +269,13 @@ binary_sensor:
   - platform: status
     name: "Status"
     entity_category: diagnostic
+
+event:
   - platform: template
-    name: "RC button light"
-    id: rc_button_light
-    filters:
-      - delayed_off: 300ms
-  - platform: template
-    name: "RC button RF/WiFi"
-    id: rc_button_rfwifi
-    filters:
-      - delayed_off: 300ms
-  - platform: template
-    name: "RC button WiFi (long)"
-    id: rc_button_wifi_long
-    filters:
-      - delayed_off: 300ms
-  - platform: template
-    name: "RC button RF (long)"
-    id: rc_button_rf_long
-    filters:
-      - delayed_off: 300ms
+    name: "RC Command"
+    id: rc_command
+    icon: "mdi:gesture-tap-button"
+    event_types: [light_toggle, mute_toggle, fan_high, fan_mid, fan_low, fan_off, rf_wifi, wifi_long, rf_long]
 
 ifan_remote:
   on_command:
@@ -298,6 +285,9 @@ ifan_remote:
             lambda: return (command.high == 0x0104 && command.low == 0x000100);
           then:
             - fan.turn_off: fan_comp
+            - event.trigger:
+                id: rc_command
+                event_type: fan_off
       - if:
           condition:
             lambda: return (command.high == 0x0104 && command.low == 0x000101);
@@ -305,6 +295,9 @@ ifan_remote:
             - fan.turn_on:
                 id: fan_comp
                 speed: 1
+            - event.trigger:
+                id: rc_command
+                event_type: fan_low
       - if:
           condition:
             lambda: return (command.high == 0x0104 && command.low == 0x000102);
@@ -312,6 +305,9 @@ ifan_remote:
             - fan.turn_on:
                 id: fan_comp
                 speed: 2
+            - event.trigger:
+                id: rc_command
+                event_type: fan_mid
       - if:
           condition:
             lambda: return (command.high == 0x0104 && command.low == 0x000103);
@@ -319,6 +315,9 @@ ifan_remote:
             - fan.turn_on:
                 id: fan_comp
                 speed: 3
+            - event.trigger:
+                id: rc_command
+                event_type: fan_high
       - if:
           condition:
             lambda: return (command.high == 0x0104 && command.low == 0x000104);
@@ -334,17 +333,17 @@ ifan_remote:
                         lambda: return id(buzzer_enabled).state;
                       then:
                         - morse_code.start: $code_short
-                  - binary_sensor.template.publish:
-                      id: rc_button_light
-                      state: ON
-                  - binary_sensor.template.publish:
-                      id: rc_button_light
-                      state: OFF
+            - event.trigger:
+                id: rc_command
+                event_type: light_toggle
       - if:
           condition:
             lambda: return (command.high == 0x0106 && command.low == 0x000101);
           then:
             - switch.toggle: buzzer_enabled
+            - event.trigger:
+                id: rc_command
+                event_type: mute_toggle
       - if:
           condition:
             lambda: return (command.high == 0x0101 && command.low == 0x000102);
@@ -354,12 +353,9 @@ ifan_remote:
                   lambda: return id(buzzer_enabled).state;
                 then:
                   - morse_code.start: $code_short
-            - binary_sensor.template.publish:
-                id: rc_button_rfwifi
-                state: ON
-            - binary_sensor.template.publish:
-                id: rc_button_rfwifi
-                state: OFF
+            - event.trigger:
+                id: rc_command
+                event_type: rf_wifi
       - if:
           condition:
             lambda: return (command.high == 0x0101 && command.low == 0x000101);
@@ -369,23 +365,17 @@ ifan_remote:
                   lambda: return id(buzzer_enabled).state;
                 then:
                   - morse_code.start: $code_long
-            - binary_sensor.template.publish:
-                id: rc_button_wifi_long
-                state: ON
-            - binary_sensor.template.publish:
-                id: rc_button_wifi_long
-                state: OFF
+            - event.trigger:
+                id: rc_command
+                event_type: wifi_long
       - if:
           condition:
             lambda: return (command.high == 0x0107 && command.low == 0x000101);
           then:
             - morse_code.start: $code_rc_unpair
-            - binary_sensor.template.publish:
-                id: rc_button_rf_long
-                state: ON
-            - binary_sensor.template.publish:
-                id: rc_button_rf_long
-                state: OFF
+            - event.trigger:
+                id: rc_command
+                event_type: rf_long
 
 text_sensor:
   - platform: version

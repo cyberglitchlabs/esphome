@@ -5,6 +5,10 @@
 # Home Assistant automatically prefixes entity display names with the device's
 # friendly_name, so entities will appear as "Bedroom Light", "Bedroom Fan", etc.
 
+# Required in secrets.yaml: wifi_ssid, wifi_password, wifi_fallback_password, api_encryption_key
+# (generate the key with: openssl rand -base64 32)
+# Encrypted OTA below requires ESPHome 2026.9.0 or newer.
+
 substitutions:
   name: "bedroom-fan"
   friendly_name: "Bedroom"
@@ -21,11 +25,17 @@ wifi:
   password: !secret wifi_password
   ap:
     ssid: "${friendly_name} Fallback"
+    password: !secret wifi_fallback_password
 
 api:
+  encryption:
+    key: !secret api_encryption_key
 
+# OTA encryption reuses the API key (no separate password needed).
+# On ESPHome older than 2026.9.0, flash once without `encryption:` first.
 ota:
   - platform: esphome
+    encryption:
   - platform: web_server
 
 web_server:
