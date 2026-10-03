@@ -69,6 +69,11 @@ there. Also note: `packages:` in `orbital_base.yaml` must list
 `hardware` (or whichever file establishes the base `lvgl:` entries)
 *before* any file that `!extend`s them — package merge order follows
 declaration order in the `packages:` mapping.
+>
+> **Correction (2026-09-06):** empirically disproven post-merge — see the
+> matching correction in the implementation plan. `packages:` declaration
+> order does not affect `!extend` resolution on ESPHome 2026.8.2; the
+> ordering constraint described above does not hold.
 
 **`orbital_fonts.yaml`** — the MDI glyph subset (`font:`), unchanged.
 

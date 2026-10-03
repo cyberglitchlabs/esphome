@@ -18,6 +18,7 @@ jobs:
         file:
           - tests/test_s31.yaml
           - tests/test_ifan04.yaml
+          - tests/test_ifan04_secure.yaml
           - tests/test_owon_xdm.yaml
           - tests/test_wopr.yaml
           - tests/test_rv_tv.yaml
@@ -34,7 +35,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'  # latest ESPHome requires Python >= 3.12
 
       - name: Install ESPHome
         run: pip install esphome

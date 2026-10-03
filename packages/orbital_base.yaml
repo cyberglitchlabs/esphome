@@ -138,6 +138,16 @@ substitutions:
   orbital_custom5_label: "Custom 5"
   orbital_custom5_unit: ""
 
+  # Plane-overhead popup -- sourced from two HA template entities derived
+  # from the FlightRadar24 integration (see
+  # docs/superpowers/plans/2026-09-06-orbital-plane-overhead.md Task 5 for
+  # their exact definitions). orbital_plane_entity carries the nearest
+  # airborne aircraft's identity as its state and aircraft_model/airline/
+  # route/altitude/aircraft_category as attributes; orbital_plane_overhead_entity
+  # is true only while an airborne aircraft is within range.
+  orbital_plane_entity: sensor.orbital_nearest_aircraft
+  orbital_plane_overhead_entity: binary_sensor.orbital_plane_overhead
+
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
@@ -202,10 +212,6 @@ sun:
   latitude: ${orbital_latitude}
   longitude: ${orbital_longitude}
 
-# `hardware:` must stay first: ESPHome processes `packages:` entries in
-# declaration order, and screens_clock/screens_weather/presence_1..5/
-# custom_1..5 below all `!extend` the `lvgl:` instances that
-# orbital_hardware.yaml declares. Don't reorder or alphabetize this map.
 packages:
   hardware: !include orbital_hardware.yaml
   fonts: !include orbital_fonts.yaml
@@ -282,4 +288,5 @@ packages:
       label: "${orbital_custom5_label}"
       icon: "${orbital_custom5_icon}"
       unit: "${orbital_custom5_unit}"
+  planes: !include orbital_screen_plane.yaml
   navigation: !include orbital_navigation.yaml
