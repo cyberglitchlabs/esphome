@@ -205,7 +205,7 @@ light:
     pin:
       number: GPIO8
       inverted: true
-    restore_mode: ALWAYS_OFF
+    restore_state: NONE
 
 interval:
   - interval: 250ms
