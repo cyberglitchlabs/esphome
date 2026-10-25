@@ -290,7 +290,7 @@ indexing `f[0]` unguarded would fail the automation every time that happened.
 ## Quick Start
 
 Copy `examples/orbital_example.yaml`, set your `wifi_ssid`, `wifi_password`,
-`api_encryption_key`, and `ota_password` in `secrets.yaml`, override any
+and `api_encryption_key` in `secrets.yaml`, override any
 `orbital_*_entity` substitutions to point at your real HA entities, then flash:
 
 ```bash
