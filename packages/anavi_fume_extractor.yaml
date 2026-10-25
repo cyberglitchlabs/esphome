@@ -97,7 +97,7 @@ light:
     name: "Status LED"
     output: status_led_output
     id: status_led
-    restore_mode: ALWAYS_OFF
+    restore_state: NONE
 
 button:
   - platform: restart

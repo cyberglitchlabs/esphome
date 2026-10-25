@@ -88,7 +88,7 @@ Adjust `adc_threshold` in your substitutions if your divider uses different resi
 ## Quick Start
 
 Copy `examples/rv_tv_example.yaml`, set your `wifi_ssid`, `wifi_password`,
-`api_encryption_key`, and `ota_password` in `secrets.yaml`, then flash:
+and `api_encryption_key` in `secrets.yaml`, then flash:
 
 ```bash
 esphome run examples/rv_tv_example.yaml

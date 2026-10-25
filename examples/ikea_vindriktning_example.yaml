@@ -19,9 +19,15 @@ wifi:
     ssid: "${friendly_name} Fallback"
 
 api:
+  encryption:
+    key: !secret api_encryption_key
 
+# OTA encryption reuses the API key (no separate password needed).
+# On ESPHome older than 2026.9.0, or when migrating an existing device, flash once
+# with the old `password:` first, then switch to `encryption:`.
 ota:
   - platform: esphome
+    encryption:
   - platform: web_server
 
 web_server:
