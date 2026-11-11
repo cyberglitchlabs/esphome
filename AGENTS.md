@@ -98,7 +98,8 @@ Every supported device follows a strict layered composition pattern:
 | Element | Convention | Example |
 |---------|-----------|---------|
 | ESPHome node name (`esphome.name`) | lowercase-hyphen | `my-plug`, `dryer`, `bedroom-fan` |
-| `friendly_name` | Title Case with spaces | `"My Plug"`, `"Jacob's Bedroom"` |
+| `friendly_name` | Title Case with spaces | `"My Plug"`, `"Jacob's Bedroom Ceiling"` |
+| `friendly_name` content | Describe the device, not just the room (HA 2026.11+ shows device name + entity name) | `"Bedroom Ceiling"` (gives "Bedroom Ceiling Light"), not `"Bedroom"` |
 | Entity `name:` within a package | Short Title Case, NOT device-prefixed | `"Relay"`, `"WiFi Signal"`, `"Daily Energy"` |
 | Internal IDs (`id:`) | `snake_case` | `relay`, `fan_comp`, `my_power` |
 | `substitutions` keys | `snake_case` | `relay_restore_mode`, `ct_factor` |

@@ -1,9 +1,11 @@
 # Example configuration for Sonoff iFan04
 # Copy this file to your ESPHome config directory and customize
 #
-# Use the room name as friendly_name (e.g. "Bedroom", not "Bedroom Fan").
-# Home Assistant automatically prefixes entity display names with the device's
-# friendly_name, so entities will appear as "Bedroom Light", "Bedroom Fan", etc.
+# Name the device for what it controls, with the room as a qualifier
+# (e.g. "Bedroom Ceiling", not just "Bedroom" and not "Bedroom Ceiling Fan").
+# Home Assistant 2026.11+ shows entities as the device name plus the entity name,
+# so entities will appear as "Bedroom Ceiling Light" and "Bedroom Ceiling Fan".
+# A bare room name makes a poor device name: the area already provides the room.
 
 # Required in secrets.yaml: wifi_ssid, wifi_password, wifi_fallback_password, api_encryption_key
 # (generate the key with: openssl rand -base64 32)
@@ -11,7 +13,7 @@
 
 substitutions:
   name: "bedroom-fan"
-  friendly_name: "Bedroom"
+  friendly_name: "Bedroom Ceiling"
 
 packages:
   device:
